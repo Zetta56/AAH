@@ -1,13 +1,11 @@
 <template>
   <b-container class="login-container">
     <h1>Algorithms Against Humanity</h1>
-    <form>
-      <!-- <input type="text" placeholder="Enter a username..." v-model="text" />
-      <button class="submitBtn">></button> -->
+    <form @submit.prevent="onSubmit">
        <b-input-group>
         <b-form-input type="text" placeholder="Enter a username..." v-model="text" />
         <b-input-group-append>
-          <b-button type="submit" variant="success" :disabled="this.text.length < 3">
+          <b-button type="submit" variant="dark" :disabled="this.text.length < 3">
             <b-icon-check />
           </b-button>
         </b-input-group-append>
@@ -17,14 +15,30 @@
 </template>
 
 <script>
+import api from '../api'
+
 export default {
   name: 'Login',
+  props: {
+    user: Object
+  },
   data: function () {
     return {
       text: ''
     }
+  },
+  methods: {
+    onSubmit: async function () {
+      const response = await api('/api/login', {
+        method: 'POST',
+        body: JSON.stringify({
+          username: this.text
+        })
+      })
+      localStorage.setItem('token', response.token)
+      this.$parent.$emit('update:user', { username: this.text, isLoggedIn: true })
+    }
   }
-
 }
 </script>
 
@@ -32,15 +46,15 @@ export default {
 h1 {
   color: #dddddd;
   font-size: 72px;
-  text-align: center;
-  margin-bottom: 4rem;
   line-height: 5.5rem;
   letter-spacing: 1.5px;
+  text-align: center;
+  margin-bottom: 4rem;
 }
 
 .input-group {
   border-radius: 20px;
-  overflow: hidden;
+  overflow: hidden; /* hides parts cut by border-radius */
   width: 80%;
   margin: 0 auto;
 }

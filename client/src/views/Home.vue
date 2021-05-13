@@ -1,17 +1,23 @@
 <template>
-  <div class="home-container">
-    <Login />
+  <div v-if="user.isLoggedIn !== null" class="home-container">
+    <RoomList v-if="user.isLoggedIn" :user="user" />
+    <Login v-else :user="user" />
   </div>
 </template>
 
 <script>
 // @ is an alias to /src
-import Login from '@/components/Login.vue'
+import Login from '../components/Login.vue'
+import RoomList from '../components/RoomList.vue'
 
 export default {
   name: 'Home',
   components: {
-    Login
+    Login,
+    RoomList
+  },
+  props: {
+    user: Object
   }
 }
 </script>
@@ -22,8 +28,6 @@ export default {
   justify-content: center;
   align-items: center;
   flex-wrap: wrap;
-  height: 100vh;
-  width: 100vw;
   background-color: #222222;
 }
 </style>
