@@ -1,41 +1,52 @@
 <template>
   <div id="app">
-    <Navbar v-if="user.isLoggedIn" @update:user="onUpdateUser" />
-    <router-view :user="user" @update:user="onUpdateUser" />
+    <Navbar v-if="isLoggedIn" />
+    <div v-if="isLoggedIn !== null" :style="bgColor" class="content">
+      <Login v-if="isLoggedIn === false" />
+      <RoomList v-else-if="!room" />
+    </div>
   </div>
 </template>
 
 <script>
+import { mapState, mapActions } from 'vuex'
 import api from './api'
 import Navbar from './components/Navbar'
+import Login from './components/Login'
+import RoomList from './components/RoomList'
 
 export default {
   name: 'App',
   components: {
-    Navbar
+    Navbar,
+    Login,
+    RoomList
   },
-  data () {
-    return {
-      user: { username: null, isLoggedIn: null }
+  computed: {
+    ...mapState(['user', 'isLoggedIn', 'room']),
+    bgColor: function () {
+      if (this.isLoggedIn === false || !this.room) {
+        return { backgroundColor: '#222222' }
+      } else {
+        return { backgroundColor: '#ffffff' }
+      }
     }
   },
   methods: {
-    onUpdateUser: function (newUser) {
-      this.user = newUser
-    }
+    ...mapActions(['updateUser', 'updateLoginStatus'])
   },
   async created () {
-    const token = localStorage.getItem('token')
-    const response = await api('/api/authenticate', {
+    const response = await api('/authenticate', {
       method: 'POST',
       body: JSON.stringify({
-        token: token
+        token: localStorage.getItem('token')
       })
     })
     if (response.verified) {
-      this.user = { username: response.username, isLoggedIn: true }
+      this.updateUser({ username: response.username, id: response.id })
+      this.updateLoginStatus(true)
     } else {
-      this.user = { username: null, isLoggedIn: false }
+      this.updateLoginStatus(false)
     }
   }
 }
@@ -51,7 +62,7 @@ export default {
   height: 100vh;
 }
 
-#app > *:not(.nav-container) {
+.content {
   flex-grow: 1;
 }
 </style>

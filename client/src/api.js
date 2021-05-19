@@ -1,6 +1,6 @@
-const baseUrl = process.env.BACKEND_URL || 'http://localhost:3001'
+const baseUrl = process.env.VUE_APP_BACKEND_URL || window.location.origin
 const api = async (path, options) => {
-  const response = await fetch(baseUrl + path, {
+  const response = await fetch(baseUrl + '/api' + path, {
     headers: {
       'Content-Type': 'application/json'
     },

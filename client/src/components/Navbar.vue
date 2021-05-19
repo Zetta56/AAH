@@ -1,23 +1,24 @@
 <template>
   <div class="nav-container">
-    <router-link to="/" class="brand">
+    <span class="brand">
       <strong>AAH</strong>
-    </router-link>
-    <div class="nav-right">
-      <router-link to="/" class="logout" @click.native="logout">Logout</router-link>
+    </span>
+    <div class="right">
+      <span class="logout" @click="logout">Logout</span>
     </div>
   </div>
 </template>
 
 <script>
+import { mapActions } from 'vuex'
+
 export default {
-  props: {
-    user: Object
-  },
   methods: {
+    ...mapActions(['updateUser', 'updateLoginStatus']),
     logout: function () {
       localStorage.removeItem('token')
-      this.$emit('update:user', { username: null, isLoggedIn: false })
+      this.updateUser(null)
+      this.updateLoginStatus(false)
     }
   }
 }
@@ -29,14 +30,14 @@ export default {
   background-color: #2a2a2a;
 }
 
-.nav-right {
+.nav-container .right {
   float: right;
 }
 
-a {
+.nav-container span {
   color: #eeeeee;
   font-size: 22px;
-  text-decoration: none;
   padding: 0 10px;
+  cursor: pointer;
 }
 </style>

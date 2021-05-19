@@ -1,48 +1,58 @@
 <template>
   <b-container class="login-container">
-    <h1>Algorithms Against Humanity</h1>
-    <form @submit.prevent="onSubmit">
-       <b-input-group>
-        <b-form-input type="text" placeholder="Enter a username..." v-model="text" />
-        <b-input-group-append>
-          <b-button type="submit" variant="dark" :disabled="this.text.length < 3">
-            <b-icon-check />
-          </b-button>
-        </b-input-group-append>
-      </b-input-group>
-    </form>
+    <div>
+      <h1>Algorithms Against Humanity</h1>
+      <TextInput
+        :onSubmit="onSubmit"
+        :text.sync="username"
+        :placeholder="'Enter a username...'"
+        :minLength=3
+      />
+    </div>
   </b-container>
 </template>
 
 <script>
+import { mapActions } from 'vuex'
 import api from '../api'
+import TextInput from './TextInput'
 
 export default {
   name: 'Login',
-  props: {
-    user: Object
+  components: {
+    TextInput
   },
   data: function () {
     return {
-      text: ''
+      username: ''
     }
   },
   methods: {
+    ...mapActions(['updateUser', 'updateLoginStatus']),
     onSubmit: async function () {
-      const response = await api('/api/login', {
+      const response = await api('/login', {
         method: 'POST',
         body: JSON.stringify({
-          username: this.text
+          username: this.username
         })
       })
       localStorage.setItem('token', response.token)
-      this.$parent.$emit('update:user', { username: this.text, isLoggedIn: true })
+      this.updateUser(response.user)
+      this.updateLoginStatus(true)
     }
   }
 }
 </script>
 
-<style>
+<style scoped>
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  height: 100%;
+}
+
 h1 {
   color: #dddddd;
   font-size: 72px;
@@ -52,22 +62,21 @@ h1 {
   margin-bottom: 4rem;
 }
 
-.input-group {
+>>> .input-group {
   border-radius: 20px;
   overflow: hidden; /* hides parts cut by border-radius */
+  flex-wrap: nowrap;
   width: 80%;
   margin: 0 auto;
 }
 
-.form-control {
-  border: none;
+>>> .form-control {
   font-size: 42px;
-  padding: 3rem 2rem;
-  outline: none;
   width: 80%;
+  padding: 3rem 2rem;
 }
 
-.b-icon {
+>>> .b-icon {
   font-size: 40px !important;
 }
 
@@ -75,7 +84,7 @@ h1 {
   h1 {
     font-size: 60px;
   }
-  .form-control {
+  >>> .form-control {
     font-size: 26px;
     padding: 2rem 1.5rem;
   }
