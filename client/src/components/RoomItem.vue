@@ -9,7 +9,11 @@
       <span class="population">{{ room.population }}/4</span>
     </div>
     <b-collapse v-if="room.access === 'private'" :id="`collapse-${index}`" class="bottom">
-      <TextInput :text.sync="password" :placeholder="'Password'" />
+      <TextInput :text.sync="password" :placeholder="'Password'">
+        <template #prepend>
+          <b-icon-arrow-return-right />
+        </template>
+      </TextInput>
     </b-collapse>
   </div>
 </template>

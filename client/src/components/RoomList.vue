@@ -14,25 +14,29 @@
       />
     </div>
     <div class="room-create">
-      <div class="access-container" @click="onAccessClick">
-        <b-icon-lock-fill v-if="newRoom.access === 'private'" />
-        <b-icon-unlock-fill v-else />
-      </div>
       <TextInput
         :text.sync="newRoom.name"
         :placeholder="'Create a room...'"
         class="name-input"
-      />
+      >
+        <template v-slot:prepend>
+          <div class="access-container" @click="onAccessClick">
+            <b-icon-lock-fill v-if="newRoom.access === 'private'" />
+            <b-icon-unlock-fill v-else />
+          </div>
+        </template>
+      </TextInput>
       <div v-if="newRoom.access === 'private'" class="password-container">
-        <div class="arrow-container">
-          <b-icon-arrow-return-right />
-        </div>
         <TextInput
           :text.sync="newRoom.password"
           :placeholder="'Enter a password...'"
           :show-btn="false"
           class="password-input"
-        />
+        >
+          <template #prepend>
+            <b-icon-arrow-return-right />
+          </template>
+        </TextInput>
       </div>
     </div>
   </div>
@@ -104,7 +108,6 @@ export default {
 </script>
 
 <style scoped>
-/* List */
 .room-list-container {
   width: 50%;
   margin: 15vh auto 0 auto;
@@ -132,52 +135,21 @@ export default {
   margin-right: 22px;
 }
 
-/* Create Form (Top) */
-.room-create {
+.access-container {
   display: flex;
-  flex-wrap: wrap;
-}
-
-.room-create .b-icon {
-  height: 100%;
-}
-
-.room-create .access-container {
-  background-color: #555555;
-  align-self: stretch;
-  text-align: center;
-  cursor: pointer;
-  flex-basis: 5.5rem;
-}
-
-.room-create .name-input,
-.room-create .password-input {
-  flex-grow: 1;
-  margin-left: -1rem;
-}
-
-.name-input >>> .form-control {
-  background-color: #555555;
-}
-
-/* Create Form (Bottom) */
-.room-create .password-container {
-  display: flex;
+  justify-content: center;
+  align-items: center;
   width: 100%;
 }
 
-.room-create .arrow-container {
-  background-color: #777777;
-  align-self: stretch;
-  text-align: center;
-  flex-basis: 5.5rem;
+.name-input >>> .input-group-prepend {
+  background-color: #3a3a3a;
 }
 
-.room-create .password-input {
-  flex-grow: 1;
+.name-input >>> .form-control {
+  background-color: #646464;
 }
 
-/* Input Settings */
 >>> .form-control {
   color: #eeeeee;
   font-size: 22px;
@@ -185,6 +157,15 @@ export default {
   background-color: #777777;
   border: none;
   border-radius: 0;
+}
+
+>>> .btn {
+  font-size: 20px;
+}
+
+>>> .input-group-prepend {
+  width: 5rem;
+  background-color: #777777;
 }
 
 >>> ::placeholder {
@@ -197,10 +178,6 @@ export default {
 
 >>> ::-ms-input-placeholder {
   color: #cccccc;
-}
-
->>> .btn {
-  font-size: 20px;
 }
 
 @media only screen and (max-width: 768px) {

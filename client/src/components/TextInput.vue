@@ -1,6 +1,9 @@
 <template>
   <form @submit.prevent="onSubmit" class="text-input-container">
     <b-input-group>
+      <b-input-group-prepend v-if="this.$slots.prepend">
+        <slot name="prepend"></slot>
+      </b-input-group-prepend>
       <b-form-input
         type="text"
         :placeholder="placeholder"
@@ -38,3 +41,11 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+>>> .input-group-prepend {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+</style>
