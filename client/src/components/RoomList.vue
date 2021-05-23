@@ -16,6 +16,8 @@
     <div class="room-create">
       <TextInput
         :text.sync="newRoom.name"
+        :onSubmit="onRoomCreate"
+        :validate="validateCreate"
         :placeholder="'Create a room...'"
         class="name-input"
       >
@@ -30,7 +32,7 @@
         <TextInput
           :text.sync="newRoom.password"
           :placeholder="'Enter a password...'"
-          :show-btn="false"
+          :btnVisible="false"
           class="password-input"
         >
           <template #prepend>
@@ -51,9 +53,6 @@ export default {
   data: function () {
     return {
       rooms: [
-        { access: 'public', name: 'test 1', population: '1' },
-        { access: 'private', name: 'test 2', population: '3' },
-        { access: 'public', name: 'test 3', population: '2' },
         { access: 'public', name: 'test 1', population: '1' },
         { access: 'private', name: 'test 2', population: '3' },
         { access: 'public', name: 'test 3', population: '2' },
@@ -86,22 +85,25 @@ export default {
         this.newRoom.access = 'public'
       }
     },
-    createWebSocket: function () {
-      const ws = new WebSocket(this.getWebSocketURL())
-      ws.onopen = (event) => {
-        console.log('connected')
-        // ws.send(JSON.stringify({ room: 'testroom', body: this.user.username }))
+    validateCreate: function () {
+      if (this.newRoom.name.length < 1) {
+        return false
       }
-      ws.onmessage = (event) => {
-        console.log(JSON.parse(event.data))
+      if (this.newRoom.access === 'private' && this.newRoom.password.length < 1) {
+        return false
       }
+      return true
     },
-    getWebSocketURL: function () {
-      let baseUrl = process.env.VUE_APP_BACKEND_URL || window.location.origin
-      if (baseUrl.substring(0, 4) === 'http') {
-        baseUrl = baseUrl.replace('http', 'ws')
-      }
-      return baseUrl
+    onRoomCreate: function () {
+      // ws.onopen = () => {
+      //   ws.send(JSON.stringify({
+      //     type: 'join',
+      //     room: this.newRoom.name,
+      //     userId: this.user.id,
+      //     body: this.newRoom
+      //   }))
+      // }
+      console.log('creating')
     }
   }
 }

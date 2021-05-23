@@ -33,18 +33,24 @@ export default {
     }
   },
   methods: {
-    ...mapActions(['updateUser', 'updateLoginStatus'])
+    ...mapActions(['updateUser', 'updateLoginStatus', 'connectWebSocket'])
   },
   async created () {
     const response = await api('/authenticate', {
       method: 'POST',
-      body: JSON.stringify({
-        token: localStorage.getItem('token')
-      })
+      body: JSON.stringify({ token: localStorage.getItem('token') })
     })
     if (response.verified) {
-      this.updateUser({ username: response.username, id: response.id })
-      this.updateLoginStatus(true)
+      this.connectWebSocket({
+        token: localStorage.getItem('token'),
+        callback: () => {
+          this.updateUser({ username: response.username, id: response.id })
+          this.updateLoginStatus(true)
+        },
+        error: () => {
+          this.updateLoginStatus(false)
+        }
+      })
     } else {
       this.updateLoginStatus(false)
     }

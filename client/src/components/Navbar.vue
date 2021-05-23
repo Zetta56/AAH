@@ -14,11 +14,12 @@ import { mapActions } from 'vuex'
 
 export default {
   methods: {
-    ...mapActions(['updateUser', 'updateLoginStatus']),
+    ...mapActions(['updateUser', 'updateLoginStatus', 'connectWebSocket']),
     logout: function () {
       localStorage.removeItem('token')
       this.updateUser(null)
       this.updateLoginStatus(false)
+      this.connectWebSocket({ token: null })
     }
   }
 }

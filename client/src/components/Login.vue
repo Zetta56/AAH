@@ -5,6 +5,7 @@
       <TextInput
         :onSubmit="onSubmit"
         :text.sync="username"
+        :validate="validate"
         :placeholder="'Enter a username...'"
         :minLength=3
       />
@@ -28,17 +29,23 @@ export default {
     }
   },
   methods: {
-    ...mapActions(['updateUser', 'updateLoginStatus']),
+    ...mapActions(['updateUser', 'updateLoginStatus', 'connectWebSocket']),
+    validate: function () {
+      return this.username.length >= 3
+    },
     onSubmit: async function () {
       const response = await api('/login', {
         method: 'POST',
-        body: JSON.stringify({
-          username: this.username
-        })
+        body: JSON.stringify({ username: this.username })
       })
       localStorage.setItem('token', response.token)
-      this.updateUser(response.user)
-      this.updateLoginStatus(true)
+      this.connectWebSocket({
+        token: localStorage.getItem('token'),
+        callback: () => {
+          this.updateUser(response.user)
+          this.updateLoginStatus(true)
+        }
+      })
     }
   }
 }

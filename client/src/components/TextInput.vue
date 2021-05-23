@@ -10,8 +10,8 @@
         :value="text"
         @keyup="$emit('update:text', $event.target.value)"
       />
-      <b-input-group-append v-if="showBtn">
-        <b-button type="submit" :variant="btnColor" :disabled="this.text.length < minLength">
+      <b-input-group-append v-if="btnVisible">
+        <b-button type="submit" :variant="btnColor" :disabled="!validate()">
           <b-icon-check />
         </b-button>
       </b-input-group-append>
@@ -26,15 +26,17 @@ export default {
     onSubmit: Function,
     text: String,
     placeholder: String,
-    minLength: {
-      type: Number,
-      default: 1
+    validate: {
+      type: Function,
+      default: function () {
+        return this.text.length > 0
+      }
     },
     btnColor: {
       type: String,
       default: 'dark'
     },
-    showBtn: {
+    btnVisible: {
       type: Boolean,
       default: true
     }
