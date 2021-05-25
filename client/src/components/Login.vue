@@ -34,7 +34,7 @@ export default {
       return this.username.length >= 3
     },
     onSubmit: async function () {
-      const response = await api('/login', {
+      const response = await api('/api/login', {
         method: 'POST',
         body: JSON.stringify({ username: this.username })
       })

@@ -36,7 +36,7 @@ export default {
     ...mapActions(['updateUser', 'updateLoginStatus', 'connectWebSocket'])
   },
   async created () {
-    const response = await api('/authenticate', {
+    const response = await api('/api/authenticate', {
       method: 'POST',
       body: JSON.stringify({ token: localStorage.getItem('token') })
     })

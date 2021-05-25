@@ -6,7 +6,7 @@
         <b-icon-unlock-fill v-else />
       </span>
       <span class="name">{{ room.name }}</span>
-      <span class="population">{{ room.population }}/4</span>
+      <span class="population">{{ population }}/4</span>
     </div>
     <b-collapse v-if="room.access === 'private'" :id="`collapse-${index}`" class="bottom">
       <TextInput :text.sync="password" :placeholder="'Password'">
@@ -19,6 +19,7 @@
 </template>
 
 <script>
+import { mapState } from 'vuex'
 import TextInput from './TextInput'
 
 export default {
@@ -35,10 +36,19 @@ export default {
       password: ''
     }
   },
+  computed: {
+    ...mapState(['webSocket']),
+    population: function () {
+      return Object.keys(this.room.participants).length
+    }
+  },
   methods: {
     onRoomClick: function () {
       if (this.room.access === 'public') {
-        console.log('public room')
+        this.webSocket.send(JSON.stringify({
+          type: 'joinRoom',
+          roomId: this.room.id
+        }))
       }
     }
   }

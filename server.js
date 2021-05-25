@@ -7,7 +7,7 @@ const http = require('http'),
       path = require('path'),
       querystring = require('querystring'),
       { v4: uuid } = require('uuid'),
-      { wss, connectedUsers } = require('./websockets');
+      { wss, rooms, connectedUsers } = require('./websockets');
 
 /** Settings */
 const app = express();
@@ -31,6 +31,9 @@ app.post('/api/authenticate', (req, res) => {
   } catch(err) {
     res.json({verified: false});
   }
+})
+app.get('/api/rooms', (req, res) => {
+  res.json(rooms);
 })
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, './client/dist/index.html'));

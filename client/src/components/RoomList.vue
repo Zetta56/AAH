@@ -46,23 +46,14 @@
 
 <script>
 import { mapState } from 'vuex'
+import api from '../api'
 import RoomItem from './RoomItem'
 import TextInput from './TextInput'
 
 export default {
   data: function () {
     return {
-      rooms: [
-        { access: 'public', name: 'test 1', population: '1' },
-        { access: 'private', name: 'test 2', population: '3' },
-        { access: 'public', name: 'test 3', population: '2' },
-        { access: 'public', name: 'test 1', population: '1' },
-        { access: 'private', name: 'test 2', population: '3' },
-        { access: 'public', name: 'test 3', population: '2' },
-        { access: 'public', name: 'test 1', population: '1' },
-        { access: 'private', name: 'test 2', population: '3' },
-        { access: 'public', name: 'test 3', population: '2' }
-      ],
+      rooms: [],
       newRoom: {
         name: '',
         access: 'public',
@@ -75,7 +66,7 @@ export default {
     TextInput
   },
   computed: {
-    ...mapState(['user'])
+    ...mapState(['user', 'webSocket'])
   },
   methods: {
     onAccessClick: function () {
@@ -95,16 +86,17 @@ export default {
       return true
     },
     onRoomCreate: function () {
-      // ws.onopen = () => {
-      //   ws.send(JSON.stringify({
-      //     type: 'join',
-      //     room: this.newRoom.name,
-      //     userId: this.user.id,
-      //     body: this.newRoom
-      //   }))
-      // }
+      this.webSocket.send(JSON.stringify({
+        type: 'createRoom',
+        body: this.newRoom
+      }))
       console.log('creating')
     }
+  },
+  async mounted () {
+    const response = await api('/api/rooms')
+    this.rooms = response
+    console.log(this.rooms)
   }
 }
 </script>
