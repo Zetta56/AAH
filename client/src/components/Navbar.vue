@@ -1,6 +1,6 @@
 <template>
   <div class="nav-container">
-    <span class="brand">
+    <span class="brand" @click="onBrandClick">
       <strong>AAH</strong>
     </span>
     <div class="right">
@@ -10,11 +10,22 @@
 </template>
 
 <script>
-import { mapActions } from 'vuex'
+import { mapState, mapActions } from 'vuex'
 
 export default {
+  computed: {
+    ...mapState(['webSocket', 'room'])
+  },
   methods: {
     ...mapActions(['updateUser', 'updateLoginStatus', 'connectWebSocket']),
+    onBrandClick: function () {
+      if (this.room) {
+        this.webSocket.send(JSON.stringify({
+          type: 'leaveRoom',
+          roomId: this.room
+        }))
+      }
+    },
     logout: function () {
       localStorage.removeItem('token')
       this.updateUser(null)

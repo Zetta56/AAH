@@ -90,13 +90,11 @@ export default {
         type: 'createRoom',
         body: this.newRoom
       }))
-      console.log('creating')
     }
   },
   async mounted () {
     const response = await api('/api/rooms')
     this.rooms = response
-    console.log(this.rooms)
   }
 }
 </script>

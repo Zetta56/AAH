@@ -14,18 +14,19 @@ wss.on('connection', function connection(ws, req) {
   ws.on('message', (payload) => {
     const { type, roomId, body } = JSON.parse(payload);
     const roomIndex = rooms.findIndex(room => room.id === roomId);
-
+    console.log(rooms);
     switch(type) {
       case 'createRoom':
         const password = body.access === 'private' ? body.password : '';
-        rooms.push({
+        const room = {
           name: body.name,
           id: uuid(),
           access: body.access,
           password: password,
           participants: { [id]: ws }
-        });
-        console.log(rooms)
+        };
+        rooms.push(room);
+        ws.send(JSON.stringify({ type: 'join', id: room.id }));
         break;
       case 'joinRoom':
         // Stop if room doesn't exist or user entered wrong password
@@ -34,8 +35,14 @@ wss.on('connection', function connection(ws, req) {
           return;
         }
         rooms[roomIndex]['participants'][id] = ws;
-        console.log(rooms)
+        ws.send(JSON.stringify({ type: 'join', id: roomId }));
         break;
+      case 'leaveRoom':
+        delete rooms[roomIndex]['participants'][id];
+        if(Object.keys(rooms[roomIndex].participants).length === 0) {
+          rooms.splice(roomIndex, 1);
+        }
+        ws.send(JSON.stringify({ type: 'leave' }))
       // default:
       //   Object.entries(rooms[room]).forEach(client => {
       //     client.send(body);
