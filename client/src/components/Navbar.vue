@@ -14,13 +14,13 @@ import { mapState, mapActions } from 'vuex'
 
 export default {
   computed: {
-    ...mapState(['webSocket', 'room'])
+    ...mapState(['websocket', 'room'])
   },
   methods: {
-    ...mapActions(['updateUser', 'updateLoginStatus', 'connectWebSocket']),
+    ...mapActions(['updateUser', 'updateLoginStatus', 'connectWebsocket']),
     onBrandClick: function () {
       if (this.room) {
-        this.webSocket.send(JSON.stringify({
+        this.websocket.send(JSON.stringify({
           type: 'leaveRoom',
           roomId: this.room.id
         }))
@@ -28,10 +28,10 @@ export default {
     },
     logout: function () {
       localStorage.removeItem('token')
-      this.webSocket.close()
+      this.websocket.close()
       this.updateUser(null)
       this.updateLoginStatus(false)
-      this.connectWebSocket({ token: null })
+      this.connectWebsocket({ token: null })
     }
   }
 }

@@ -1,7 +1,7 @@
 export default {
   user: null,
   isLoggedIn: null,
-  webSocket: null,
+  websocket: null,
   room: null,
   players: []
 }

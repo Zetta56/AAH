@@ -6,6 +6,12 @@ const deleteObject = (array, key, target) => {
   }
 }
 
+// Returns object without specific key
+const omit = (obj, key) => {
+  const { [key]: omitted, ...rest } = obj;
+  return rest;
+}
+
 // Sends message to everyone in a specific room
 const broadcast = (room, websockets, message) => {
   room['players'].forEach(player => {
@@ -18,13 +24,12 @@ const broadcast = (room, websockets, message) => {
 // Removes player from room and broadcasts their disconnection to other players
 const leaveRoom = (rooms, roomIndex, websockets, id) => {
   deleteObject(rooms[roomIndex]['players'], 'id', id);
-  const humans = rooms[roomIndex].players.filter(player => !('isBot' in player));
+  const humans = rooms[roomIndex].players.filter(player => !player.isBot);
   if(humans.length === 0) {
     if(rooms[roomIndex].access === 'private') {
       delete passwords[rooms[roomIndex].id]
     }
     rooms.splice(roomIndex, 1);
-    return true;
   } else {
     broadcast(rooms[roomIndex], websockets, {
       type: 'leave',
@@ -35,5 +40,6 @@ const leaveRoom = (rooms, roomIndex, websockets, id) => {
 }
 
 module.exports.deleteObject = deleteObject;
+module.exports.omit = omit;
 module.exports.broadcast = broadcast;
 module.exports.leaveRoom = leaveRoom;

@@ -29,7 +29,7 @@ export default {
     }
   },
   methods: {
-    ...mapActions(['updateUser', 'updateLoginStatus', 'connectWebSocket']),
+    ...mapActions(['updateUser', 'updateLoginStatus', 'connectWebsocket']),
     validate: function () {
       return this.username.length >= 3
     },
@@ -39,7 +39,7 @@ export default {
         body: JSON.stringify({ username: this.username })
       })
       localStorage.setItem('token', response.token)
-      this.connectWebSocket({
+      this.connectWebsocket({
         token: localStorage.getItem('token'),
         callback: () => {
           this.updateUser(response.user)

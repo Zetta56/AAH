@@ -3,7 +3,7 @@ const WebSocket = require('ws'),
       querystring = require('querystring'),
       { v4: uuid } = require('uuid'),
       wss = new WebSocket.Server({ noServer: true }),
-      { deleteObject, broadcast, leaveRoom } = require('./helpers'),
+      { deleteObject, omit, broadcast, leaveRoom } = require('./helpers'),
       rooms = [],
       connectedUsers = {}, // { userId: websocket }
       passwords = {};      // { roomId: password }
@@ -25,16 +25,21 @@ wss.on('connection', function connection(ws, req) {
           name: body.name,
           id: uuid(),
           started: false,
+          finished: false,
           access: body.access,
-          players: [{ id: id, username: username }]
+          players: [{ id: id, username: username, isBot: false }]
         };
         rooms.push(room);
         if(room.access === 'private') {
           passwords[room.id] = body.password;
         }
-        ws.send(JSON.stringify({ type: 'join', room: room }));
+        ws.send(JSON.stringify({
+          type: 'join',
+          room: omit(room, 'players'),
+          players: room['players']
+        }));
         break;
-        
+
       case 'joinRoom':
         // Stop if room doesn't exist or user entered wrong password
         if(roomIndex === -1 || (rooms[roomIndex].access === 'private' && 
@@ -43,11 +48,13 @@ wss.on('connection', function connection(ws, req) {
         }
         rooms[roomIndex]['players'].push({
           id: id,
-          username: username
+          username: username,
+          isBot: false
         });
         broadcast(rooms[roomIndex], connectedUsers, {
           type: 'join',
-          room: rooms[roomIndex]
+          room: omit(rooms[roomIndex], 'players'),
+          players: rooms[roomIndex]['players']
         });
         break;
 
@@ -71,12 +78,21 @@ wss.on('connection', function connection(ws, req) {
         });
         break;
 
+      case 'startGame':
+        rooms[roomIndex]['started'] = true;
+        broadcast(rooms[roomIndex], connectedUsers, {
+          type: 'startGame',
+          room: omit(rooms[roomIndex], 'players')
+        })
+        break;
+
       case 'leaveRoom': {
         leaveRoom(rooms, roomIndex, connectedUsers, id);
         connectedUsers[id].send(JSON.stringify({
           type: 'leave',
           id: id
         }))
+        break;
       }
     }
   })

@@ -5,6 +5,7 @@
       <Login v-if="isLoggedIn === false" />
       <RoomList v-else-if="!room" />
       <WaitingRoom v-else-if="!room.started" />
+      <Game v-else-if="!room.finished" />
     </div>
   </div>
 </template>
@@ -16,6 +17,7 @@ import Navbar from './components/Navbar'
 import Login from './components/Login'
 import RoomList from './components/RoomList'
 import WaitingRoom from './components/WaitingRoom'
+import Game from './components/Game'
 
 export default {
   name: 'App',
@@ -23,7 +25,8 @@ export default {
     Navbar,
     Login,
     RoomList,
-    WaitingRoom
+    WaitingRoom,
+    Game
   },
   computed: {
     ...mapState(['user', 'isLoggedIn', 'room']),
@@ -36,7 +39,7 @@ export default {
     }
   },
   methods: {
-    ...mapActions(['updateUser', 'updateLoginStatus', 'connectWebSocket'])
+    ...mapActions(['updateUser', 'updateLoginStatus', 'connectWebsocket'])
   },
   async created () {
     const response = await api('/api/authenticate', {
@@ -44,7 +47,7 @@ export default {
       body: JSON.stringify({ token: localStorage.getItem('token') })
     })
     if (response.verified) {
-      this.connectWebSocket({
+      this.connectWebsocket({
         token: localStorage.getItem('token'),
         callback: () => {
           this.updateUser({ username: response.username, id: response.id })

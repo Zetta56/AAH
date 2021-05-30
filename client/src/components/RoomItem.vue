@@ -37,7 +37,7 @@ export default {
     }
   },
   computed: {
-    ...mapState(['webSocket']),
+    ...mapState(['websocket']),
     population: function () {
       return Object.keys(this.room.players).length
     }
@@ -45,7 +45,7 @@ export default {
   methods: {
     onRoomClick: function () {
       if (this.room.access === 'public') {
-        this.webSocket.send(JSON.stringify({
+        this.websocket.send(JSON.stringify({
           type: 'joinRoom',
           roomId: this.room.id
         }))

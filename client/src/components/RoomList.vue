@@ -66,7 +66,7 @@ export default {
     TextInput
   },
   computed: {
-    ...mapState(['user', 'webSocket'])
+    ...mapState(['user', 'websocket'])
   },
   methods: {
     onAccessClick: function () {
@@ -86,7 +86,7 @@ export default {
       return true
     },
     onRoomCreate: function () {
-      this.webSocket.send(JSON.stringify({
+      this.websocket.send(JSON.stringify({
         type: 'createRoom',
         body: this.newRoom
       }))

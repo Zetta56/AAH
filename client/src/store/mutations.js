@@ -5,8 +5,8 @@ export default {
   updateLoginStatus (state, loginStatus) {
     state.isLoggedIn = loginStatus
   },
-  updateWebSocket (state, webSocket) {
-    state.webSocket = webSocket
+  updateWebsocket (state, websocket) {
+    state.websocket = websocket
   },
   updateRoom (state, room) {
     state.room = room
