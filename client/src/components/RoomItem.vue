@@ -39,7 +39,7 @@ export default {
   computed: {
     ...mapState(['webSocket']),
     population: function () {
-      return Object.keys(this.room.participants).length
+      return Object.keys(this.room.players).length
     }
   },
   methods: {

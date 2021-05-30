@@ -22,12 +22,13 @@ export default {
       if (this.room) {
         this.webSocket.send(JSON.stringify({
           type: 'leaveRoom',
-          roomId: this.room
+          roomId: this.room.id
         }))
       }
     },
     logout: function () {
       localStorage.removeItem('token')
+      this.webSocket.close()
       this.updateUser(null)
       this.updateLoginStatus(false)
       this.connectWebSocket({ token: null })

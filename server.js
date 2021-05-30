@@ -44,7 +44,7 @@ server.on('upgrade', (req, socket, head) => {
     const token = querystring.parse(req.url.substring(2)).token;
     const { id } = jwt.verify(token, process.env.JWT_SECRET);
 
-    if(!connectedUsers.includes(id)) {
+    if(!(id in connectedUsers)) {
       wss.handleUpgrade(req, socket, head, (ws) => {
         wss.emit('connection', ws, req);
       });

@@ -10,5 +10,8 @@ export default {
   },
   updateRoom (state, room) {
     state.room = room
+  },
+  updatePlayers (state, players) {
+    state.players = players
   }
 }

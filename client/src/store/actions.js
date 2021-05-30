@@ -6,8 +6,7 @@ export default {
     context.commit('updateLoginStatus', loginStatus)
   },
   connectWebSocket (context, { token, callback, error }) {
-    // Don't connect to room if user is already in one
-    if (context.state.room) {
+    if (token == null) {
       return
     }
 
@@ -31,11 +30,24 @@ export default {
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data)
       switch (data.type) {
-        case 'join':
-          context.commit('updateRoom', data.id)
+        case 'join': {
+          const { players, ...room } = data.room
+          if (!context.state.room) {
+            context.commit('updateRoom', room)
+          }
+          context.commit('updatePlayers', players)
+          break
+        }
+        case 'updateBots':
+          context.commit('updatePlayers', data.players)
           break
         case 'leave':
-          context.commit('updateRoom', null)
+          if (data.id === context.state.user.id) {
+            context.commit('updateRoom', null)
+            context.commit('updatePlayers', [])
+          } else {
+            context.commit('updatePlayers', data.players)
+          }
           break
       }
     }

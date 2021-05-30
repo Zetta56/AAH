@@ -4,6 +4,7 @@
     <div v-if="isLoggedIn !== null" :style="bgColor" class="content">
       <Login v-if="isLoggedIn === false" />
       <RoomList v-else-if="!room" />
+      <WaitingRoom v-else-if="!room.started" />
     </div>
   </div>
 </template>
@@ -14,13 +15,15 @@ import api from './api'
 import Navbar from './components/Navbar'
 import Login from './components/Login'
 import RoomList from './components/RoomList'
+import WaitingRoom from './components/WaitingRoom'
 
 export default {
   name: 'App',
   components: {
     Navbar,
     Login,
-    RoomList
+    RoomList,
+    WaitingRoom
   },
   computed: {
     ...mapState(['user', 'isLoggedIn', 'room']),

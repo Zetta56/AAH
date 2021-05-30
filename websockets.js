@@ -3,67 +3,93 @@ const WebSocket = require('ws'),
       querystring = require('querystring'),
       { v4: uuid } = require('uuid'),
       wss = new WebSocket.Server({ noServer: true }),
+      { deleteObject, broadcast, leaveRoom } = require('./helpers'),
       rooms = [],
-      connectedUsers = [];
+      connectedUsers = {}, // { userId: websocket }
+      passwords = {};      // { roomId: password }
 
 wss.on('connection', function connection(ws, req) {
+  // Connection Initialization
   const token = querystring.parse(req.url.substring(2)).token;
-  const { id } = jwt.verify(token, process.env.JWT_SECRET);
-  connectedUsers.push(id);
+  const { username, id } = jwt.verify(token, process.env.JWT_SECRET);
+  connectedUsers[id] = ws;
 
   ws.on('message', (payload) => {
+    // Parsing request
     const { type, roomId, body } = JSON.parse(payload);
     const roomIndex = rooms.findIndex(room => room.id === roomId);
-    console.log(rooms);
+    
     switch(type) {
       case 'createRoom':
-        const password = body.access === 'private' ? body.password : '';
         const room = {
           name: body.name,
           id: uuid(),
+          started: false,
           access: body.access,
-          password: password,
-          participants: { [id]: ws }
+          players: [{ id: id, username: username }]
         };
         rooms.push(room);
-        ws.send(JSON.stringify({ type: 'join', id: room.id }));
+        if(room.access === 'private') {
+          passwords[room.id] = body.password;
+        }
+        ws.send(JSON.stringify({ type: 'join', room: room }));
         break;
+        
       case 'joinRoom':
         // Stop if room doesn't exist or user entered wrong password
         if(roomIndex === -1 || (rooms[roomIndex].access === 'private' && 
-            body.password !== rooms[roomIndex].password)) {
+            body.password !== passwords[rooms[roomIndex].id])) {
           return;
         }
-        rooms[roomIndex]['participants'][id] = ws;
-        ws.send(JSON.stringify({ type: 'join', id: roomId }));
+        rooms[roomIndex]['players'].push({
+          id: id,
+          username: username
+        });
+        broadcast(rooms[roomIndex], connectedUsers, {
+          type: 'join',
+          room: rooms[roomIndex]
+        });
         break;
-      case 'leaveRoom':
-        delete rooms[roomIndex]['participants'][id];
-        if(Object.keys(rooms[roomIndex].participants).length === 0) {
-          rooms.splice(roomIndex, 1);
-        }
-        ws.send(JSON.stringify({ type: 'leave' }))
-      // default:
-      //   Object.entries(rooms[room]).forEach(client => {
-      //     client.send(body);
-      //   });
+
+      case 'addBot':
+        rooms[roomIndex]['players'].push({
+          id: uuid(),
+          username: body,
+          isBot: true
+        });
+        broadcast(rooms[roomIndex], connectedUsers, {
+          type: 'updateBots',
+          players: rooms[roomIndex]['players']
+        });
+        break;
+
+      case 'deleteBot':
+        deleteObject(rooms[roomIndex]['players'], 'id', body);
+        broadcast(rooms[roomIndex], connectedUsers, {
+          type: 'updateBots',
+          players: rooms[roomIndex]['players']
+        });
+        break;
+
+      case 'leaveRoom': {
+        leaveRoom(rooms, roomIndex, connectedUsers, id);
+        connectedUsers[id].send(JSON.stringify({
+          type: 'leave',
+          id: id
+        }))
+      }
     }
   })
 
   ws.on('close', () => {
-    // Pull user from rooms
+    // Pull user from room
     for(let i = 0; i < rooms.length; i++) {
-      if(id in rooms[i].participants) {
-        delete rooms[i]['participants'][id];
-        if(Object.keys(rooms[i].participants).length === 0) {
-          rooms.splice(i, 1);
-        }
+      if(rooms[i]['players'].some(player => player.id === id)) {
+        leaveRoom(rooms, i, connectedUsers, id);
         break;
       }
     }
-    // Pull user from connectedUsers
-    const index = connectedUsers.indexOf(id);
-    connectedUsers.splice(index, 1);
+    delete connectedUsers[id]
   })
 })
 
