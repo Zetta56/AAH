@@ -116,6 +116,7 @@ export default {
 .headers {
   background-color: #2a2a2a;
   padding: 1rem;
+  overflow: hidden;
 }
 
 .headers span {
