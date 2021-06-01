@@ -1,63 +1,79 @@
 <template>
   <b-container class="game-container">
+    <div class="top-row">
+      <b-button variant="dark" class="scoreboard-button">Scoreboard</b-button>
+      <span class="timer">30</span>
+    </div>
     <Carousel
       :paginationEnabled="false"
-      :perPageCustom="[[1100, 4], [991, 3], [580, 2], [0, 1]]"
       :navigationEnabled="true"
       :centerMode="true"
-      class="shownCards"
+      :mouseDrag="false"
+      :touchDrag="false"
+      :perPageCustom="[[1200, 4], [991, 3], [580, 2], [0, 1]]"
+      :speed="250"
+      class="shown-cards"
     >
       <slide>
         <div class="dark card">{{ prompt }}</div>
       </slide>
-      <slide v-for="i in playedCards" :key="i">
-        <div class="gray card"></div>
+      <slide v-for="card, index in submitted" :key="index">
+        <div class="gray card">{{ card.text }}</div>
       </slide>
     </Carousel>
-    <Carousel
-      :paginationEnabled="false"
-      :perPageCustom="[[1100, 4], [991, 3], [580, 2], [0, 1]]"
-      :navigationEnabled="true"
-      class="hand"
-    >
-      <slide v-for="card, index in hand" :key="index">
-        <div class="light card">{{ card }}</div>
-      </slide>
-    </Carousel>
+    <Hand :cards="hand" />
   </b-container>
 </template>
 
 <script>
 import { mapState } from 'vuex'
 import { Carousel, Slide } from 'vue-carousel'
+import Hand from './Hand'
 
 export default {
   components: {
     Carousel,
-    Slide
+    Slide,
+    Hand
   },
   data: function () {
     return {
-      prompt: 'Default Prompt',
-      playedCards: 3,
-      hand: [
-        'card 1',
-        'card 2',
-        'card 3',
-        'card 4',
-        'card 5'
-      ]
+      prompt: 'Default Prompt'
     }
   },
   computed: {
-    ...mapState(['websocket', 'room'])
+    ...mapState(['websocket', 'room', 'hand', 'submitted'])
   }
 }
 </script>
 
 <style scoped>
-.shownCards {
-  width: 90%;
+.game-container {
+  width: 70%;
+  font-size: 20px;
+}
+
+.top-row {
+  display: flex;
+  margin: 10px 0;
+}
+
+.scoreboard-button,
+.timer {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem 0.75rem;
+  font-size: 20px;
+}
+
+.timer {
+  margin-left: auto;
+  background-color: #343a40;
+  color: #ffffff;
+  border-radius: 0.25rem;
+}
+
+.shown-cards {
   margin: 1rem auto;
 }
 
@@ -71,20 +87,10 @@ export default {
   border: none;
 }
 
-.light.card {
-  border: 1px solid #222222;
-}
-
-.hand {
-  width: 90%;
-  margin: auto;
-}
-
 .card {
   width: calc(100% - 1rem);
-  height: 300px;
+  height: 275px;
   padding: 1rem;
-  font-size: 24px;
   margin: auto;
 }
 
@@ -94,9 +100,14 @@ export default {
 }
 
 @media only screen and (max-width: 580px) {
-  .hand,
-  .shownCards {
+  .game-container {
     width: 60%;
+  }
+}
+
+@media only screen and (max-width: 400px) {
+  .game-container {
+    width: 90%;
   }
 }
 </style>

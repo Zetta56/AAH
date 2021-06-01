@@ -5,6 +5,9 @@ export default {
   updateLoginStatus (context, loginStatus) {
     context.commit('updateLoginStatus', loginStatus)
   },
+  updateHand (context, hand) {
+    context.commit('updateHand', hand)
+  },
   connectWebsocket (context, { token, callback, error }) {
     if (token) {
       let baseUrl = process.env.VUE_APP_BACKEND_URL || window.location.origin
@@ -39,8 +42,19 @@ export default {
             break
           case 'startGame': {
             context.commit('updateRoom', data.room)
+            context.state.websocket.send(JSON.stringify({
+              type: 'updatePhase',
+              roomId: context.state.room.id,
+              body: 'playing'
+            }))
             break
           }
+          case 'updatePhase':
+            context.commit('updatePhase', data.phase)
+            break
+          case 'submitCard':
+            context.commit('updateSubmitted', data.cards)
+            break
           case 'leave':
             if (data.id === context.state.user.id) {
               context.commit('updateRoom', null)

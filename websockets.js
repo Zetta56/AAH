@@ -25,7 +25,7 @@ wss.on('connection', function connection(ws, req) {
           name: body.name,
           id: uuid(),
           started: false,
-          finished: false,
+          submittedCards: [],
           access: body.access,
           players: [{ id: id, username: username, isBot: false }]
         };
@@ -84,6 +84,31 @@ wss.on('connection', function connection(ws, req) {
           type: 'startGame',
           room: omit(rooms[roomIndex], 'players')
         })
+        break;
+
+      case 'updatePhase':
+        broadcast(rooms[roomIndex], connectedUsers, {
+          type: 'updatePhase',
+          phase: body
+        })
+        break;
+
+      case 'submitCard':
+        rooms[roomIndex]['submittedCards'].push({ text: body, id: id });
+        connectedUsers[id].send(JSON.stringify({
+          type: 'updatePhase',
+          phase: 'waiting'
+        }));
+        broadcast(rooms[roomIndex], connectedUsers, {
+          type: 'submitCard',
+          cards: rooms[roomIndex]['submittedCards']
+        });
+        if(rooms[roomIndex]['submittedCards'].length === rooms[roomIndex]['players'].length) {
+          broadcast(rooms[roomIndex], connectedUsers, {
+            type: 'updatePhase',
+            phase: 'displaying'
+          });
+        }
         break;
 
       case 'leaveRoom': {

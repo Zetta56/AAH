@@ -13,5 +13,14 @@ export default {
   },
   updatePlayers (state, players) {
     state.players = players
+  },
+  updatePhase (state, phase) {
+    state.phase = phase
+  },
+  updateHand (state, hand) {
+    state.hand = hand
+  },
+  updateSubmitted (state, submitted) {
+    state.submitted = submitted
   }
 }

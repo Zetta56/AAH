@@ -7,7 +7,7 @@
         <span class="delete" @click="deleteBot(player.id)" v-if="player.isBot">&times;</span>
       </div>
       <div v-if="this.players.length < 4">
-        <b-button variant="primary" @click="addBot">Add Bot +</b-button>
+        <b-button class="add" @click="addBot">Add Bot +</b-button>
       </div>
     </div>
     <b-button variant="dark" :disabled="this.players.length < 3" @click="startGame">
@@ -71,6 +71,10 @@ export default {
 .username {
   font-size: 28px;
   padding: 1rem;
+}
+
+.add {
+  background-color: #333333;
 }
 
 .delete {
