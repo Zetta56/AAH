@@ -3,7 +3,7 @@ const WebSocket = require('ws'),
       querystring = require('querystring'),
       { v4: uuid } = require('uuid'),
       wss = new WebSocket.Server({ noServer: true }),
-      { deleteObject, omit, broadcast, leaveRoom } = require('./helpers'),
+      { deleteObject, omit, broadcast, leaveRoom, rotateCzar } = require('./helpers'),
       rooms = [],
       connectedUsers = {}, // { userId: websocket }
       passwords = {};      // { roomId: password }
@@ -26,7 +26,13 @@ wss.on('connection', function connection(ws, req) {
           id: uuid(),
           phase: 'waiting',
           access: body.access,
-          players: [{ id: id, username: username, isBot: false, card: '' }]
+          players: [{
+            id: id,
+            username: username,
+            isBot: false,
+            czar: false,
+            card: ''
+          }]
         };
         rooms.push(room);
         if(room.access === 'private') {
@@ -49,6 +55,7 @@ wss.on('connection', function connection(ws, req) {
           id: id,
           username: username,
           isBot: false,
+          czar: false,
           card: ''
         });
         broadcast(rooms[roomIndex], connectedUsers, {
@@ -63,6 +70,7 @@ wss.on('connection', function connection(ws, req) {
           id: uuid(),
           username: body,
           isBot: true,
+          czar: false,
           card: ''
         });
         broadcast(rooms[roomIndex], connectedUsers, {
@@ -79,23 +87,22 @@ wss.on('connection', function connection(ws, req) {
         });
         break;
 
-      case 'startRound':
+      case 'startRound': {
+        rotateCzar(rooms[roomIndex]);
         rooms[roomIndex]['phase'] = 'playing';
         broadcast(rooms[roomIndex], connectedUsers, {
           type: 'startRound',
-          phase: rooms[roomIndex]['phase']
+          phase: rooms[roomIndex]['phase'],
+          players: rooms[roomIndex]['players']
         })
         break;
+      }
 
       case 'submitCard':
         rooms[roomIndex]['players'].find(user => user.id === id).card = body;
-        connectedUsers[id].send(JSON.stringify({
+        broadcast(rooms[roomIndex], connectedUsers, {
           type: 'updatePlayers',
           players: rooms[roomIndex]['players']
-        }));
-        broadcast(rooms[roomIndex], connectedUsers, {
-          type: 'submitCard',
-          card: body
         });
         if(rooms[roomIndex]['players'].every(player => player.card !== '' || player.isBot)) {
           broadcast(rooms[roomIndex], connectedUsers, {
@@ -106,7 +113,7 @@ wss.on('connection', function connection(ws, req) {
         break;
 
       case 'leaveRoom': {
-        leaveRoom(rooms, roomIndex, connectedUsers, id);
+        leaveRoom(rooms, roomIndex, connectedUsers, passwords, id);
         connectedUsers[id].send(JSON.stringify({
           type: 'leave',
           id: id
@@ -120,7 +127,7 @@ wss.on('connection', function connection(ws, req) {
     // Pull user from room
     for(let i = 0; i < rooms.length; i++) {
       if(rooms[i]['players'].some(player => player.id === id)) {
-        leaveRoom(rooms, i, connectedUsers, id);
+        leaveRoom(rooms, i, connectedUsers, passwords, id);
         break;
       }
     }

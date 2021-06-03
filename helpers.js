@@ -22,7 +22,7 @@ const broadcast = (room, websockets, message) => {
 }
 
 // Removes player from room and broadcasts their disconnection to other players
-const leaveRoom = (rooms, roomIndex, websockets, id) => {
+const leaveRoom = (rooms, roomIndex, websockets, passwords, id) => {
   deleteObject(rooms[roomIndex]['players'], 'id', id);
   const humans = rooms[roomIndex].players.filter(player => !player.isBot);
   if(humans.length === 0) {
@@ -39,7 +39,19 @@ const leaveRoom = (rooms, roomIndex, websockets, id) => {
   }
 }
 
+// Makes the next player in a room the czar
+const rotateCzar = (room) => {
+  // currentCzar will be -1 on the first call
+  const currentCzar = room['players'].findIndex(user => user.czar);
+  const nextCzar = currentCzar + 1 < room['players'].length ? currentCzar + 1 : 0;
+  room['players'].forEach(player => {
+    player.czar = false;
+  });
+  room['players'][nextCzar]['czar'] = true;
+}
+
 module.exports.deleteObject = deleteObject;
 module.exports.omit = omit;
 module.exports.broadcast = broadcast;
 module.exports.leaveRoom = leaveRoom;
+module.exports.rotateCzar = rotateCzar;

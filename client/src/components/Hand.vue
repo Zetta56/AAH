@@ -23,7 +23,7 @@
     <b-button
       variant="dark"
       :disabled="!pickedCard"
-      v-if="players.find(player => player.id === user.id)['card'] === ''"
+      v-if="userPlayer['card'] === ''"
       @click="submitCard"
       class="submit-button"
     >
@@ -33,7 +33,7 @@
 </template>
 
 <script>
-import { mapState, mapActions } from 'vuex'
+import { mapState, mapActions, mapGetters } from 'vuex'
 import { Carousel, Slide } from 'vue-carousel'
 
 export default {
@@ -50,7 +50,8 @@ export default {
     }
   },
   computed: {
-    ...mapState(['websocket', 'user', 'room', 'players'])
+    ...mapState(['websocket', 'user', 'room', 'players']),
+    ...mapGetters(['userPlayer'])
   },
   methods: {
     ...mapActions(['updateHand']),
@@ -64,14 +65,16 @@ export default {
       }
     },
     submitCard: function () {
-      // Separated from websocket action to gain access to index
-      const newHand = this.cards.filter((el, i) => i !== this.pickedCard.index)
-      this.updateHand(newHand)
       this.websocket.send(JSON.stringify({
         type: 'submitCard',
         roomId: this.room.id,
         body: this.pickedCard.text
       }))
+
+      // Not in websocket action to have access to index
+      const newHand = this.cards.filter((el, i) => i !== this.pickedCard.index)
+      this.updateHand(newHand)
+      this.pickedCard = null
     }
   }
 }

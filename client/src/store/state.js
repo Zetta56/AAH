@@ -10,6 +10,5 @@ export default {
     'card 3',
     'card 4',
     'card 5'
-  ],
-  submitted: []
+  ]
 }

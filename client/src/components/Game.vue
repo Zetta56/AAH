@@ -19,16 +19,21 @@
       </slide>
       <slide v-for="card, index in submitted" :key="index">
         <div class="gray card">
-          {{ room.phase === 'displaying' ? card : '' }}
+          {{ room.phase === 'displaying' || card.id === user.id ? card.text : '' }}
         </div>
       </slide>
     </Carousel>
-    <Hand :cards="hand" />
+    <Hand :cards="hand" v-if="!userPlayer.czar" />
+    <div class="czar-message" v-else>
+      <span>
+        You are the Card Czar <b-icon-gem />
+      </span>
+    </div>
   </b-container>
 </template>
 
 <script>
-import { mapState } from 'vuex'
+import { mapState, mapGetters } from 'vuex'
 import { Carousel, Slide } from 'vue-carousel'
 import Hand from './Hand'
 
@@ -44,12 +49,13 @@ export default {
     }
   },
   computed: {
-    ...mapState(['websocket', 'room', 'hand', 'players']),
+    ...mapState(['websocket', 'user', 'room', 'hand', 'players']),
+    ...mapGetters(['userPlayer']),
     submitted: function () {
       const cards = []
       this.players.forEach(player => {
         if (player.card !== '') {
-          cards.push(player.card)
+          cards.push({ text: player.card, id: player.id })
         }
       })
       return cards
@@ -105,6 +111,22 @@ export default {
   margin: auto;
 }
 
+.czar-message {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  width: 100%;
+  height: 275px;
+  padding: 1rem;
+  background-color: #eeeeee;
+  font-size: 32px;
+}
+
+.bi-gem {
+  margin: 0 0.75rem;
+}
+
 >>> .VueCarousel-navigation-button {
   outline: none !important;
   font-size: 24px;
@@ -113,6 +135,12 @@ export default {
 @media only screen and (max-width: 580px) {
   .game-container {
     width: 60%;
+  }
+  .czar-message {
+    font-size: 26px;
+  }
+  .bi-gem {
+    margin: 0 0.25rem;
   }
 }
 

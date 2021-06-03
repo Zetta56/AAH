@@ -45,9 +45,7 @@ export default {
             break
           case 'startRound':
             context.commit('updatePhase', data.phase)
-            break
-          case 'submitCard':
-            context.commit('addSubmitted', data.card)
+            context.commit('updatePlayers', data.players)
             break
           case 'leave':
             if (data.id === context.state.user.id) {
