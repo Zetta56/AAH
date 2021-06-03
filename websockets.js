@@ -26,11 +26,13 @@ wss.on('connection', function connection(ws, req) {
           id: uuid(),
           phase: 'waiting',
           access: body.access,
+          winner: '',
           players: [{
             id: id,
             username: username,
             isBot: false,
             czar: false,
+            score: 0,
             card: ''
           }]
         };
@@ -56,6 +58,7 @@ wss.on('connection', function connection(ws, req) {
           username: username,
           isBot: false,
           czar: false,
+          score: 0,
           card: ''
         });
         broadcast(rooms[roomIndex], connectedUsers, {
@@ -71,6 +74,7 @@ wss.on('connection', function connection(ws, req) {
           username: body,
           isBot: true,
           czar: false,
+          score: 0,
           card: ''
         });
         broadcast(rooms[roomIndex], connectedUsers, {
@@ -89,10 +93,15 @@ wss.on('connection', function connection(ws, req) {
 
       case 'startRound': {
         rotateCzar(rooms[roomIndex]);
+        rooms[roomIndex]['winner'] = '';
         rooms[roomIndex]['phase'] = 'playing';
+        rooms[roomIndex]['players'].forEach(player => {
+          player.card = '';
+        });
         broadcast(rooms[roomIndex], connectedUsers, {
           type: 'startRound',
           phase: rooms[roomIndex]['phase'],
+          winner: rooms[roomIndex]['winner'],
           players: rooms[roomIndex]['players']
         })
         break;
@@ -104,12 +113,29 @@ wss.on('connection', function connection(ws, req) {
           type: 'updatePlayers',
           players: rooms[roomIndex]['players']
         });
-        if(rooms[roomIndex]['players'].every(player => player.card !== '' || player.isBot)) {
+        if(rooms[roomIndex]['players'].every(player => player.card !== '' || player.isBot || player.czar)) {
           broadcast(rooms[roomIndex], connectedUsers, {
             type: 'updatePhase',
-            phase: 'displaying'
+            phase: 'picking'
           });
         }
+        break;
+
+      case 'pickCard':
+        rooms[roomIndex]['winner'] = body;
+        rooms[roomIndex]['players'].find(player => player.id === body).score += 1;
+        broadcast(rooms[roomIndex], connectedUsers, {
+          type: 'updatePlayers',
+          players: rooms[roomIndex]['players']
+        });
+        broadcast(rooms[roomIndex], connectedUsers, {
+          type: 'updatePhase',
+          phase: `results`
+        });
+        broadcast(rooms[roomIndex], connectedUsers, {
+          type: 'updateWinner',
+          winner: body
+        });
         break;
 
       case 'leaveRoom': {

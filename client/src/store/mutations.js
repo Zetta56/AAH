@@ -14,16 +14,13 @@ export default {
   updatePhase (state, phase) {
     state.room.phase = phase
   },
+  updateWinner (state, winner) {
+    state.room.winner = winner
+  },
   updatePlayers (state, players) {
     state.players = players
   },
   updateHand (state, hand) {
     state.hand = hand
-  },
-  updateSubmitted (state, submitted) {
-    state.submitted = submitted
-  },
-  addSubmitted (state, submitted) {
-    state.submitted.push(submitted)
   }
 }

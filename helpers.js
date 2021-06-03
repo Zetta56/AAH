@@ -23,6 +23,9 @@ const broadcast = (room, websockets, message) => {
 
 // Removes player from room and broadcasts their disconnection to other players
 const leaveRoom = (rooms, roomIndex, websockets, passwords, id) => {
+  if(rooms[roomIndex]['players'].find(player => player.id === id).czar) {
+    rotateCzar(rooms[roomIndex]);
+  }
   deleteObject(rooms[roomIndex]['players'], 'id', id);
   const humans = rooms[roomIndex].players.filter(player => !player.isBot);
   if(humans.length === 0) {
@@ -36,6 +39,12 @@ const leaveRoom = (rooms, roomIndex, websockets, passwords, id) => {
       players: rooms[roomIndex]['players'],
       id: id
     });
+    if(rooms[roomIndex]['players'].every(player => player.card !== '' || player.isBot || player.czar)) {
+      broadcast(rooms[roomIndex], websockets, {
+        type: 'updatePhase',
+        phase: 'picking'
+      });
+    }
   }
 }
 

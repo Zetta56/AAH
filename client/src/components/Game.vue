@@ -18,8 +18,19 @@
         <div class="dark card">{{ prompt }}</div>
       </slide>
       <slide v-for="card, index in submitted" :key="index">
-        <div class="gray card">
-          {{ room.phase === 'displaying' || card.id === user.id ? card.text : '' }}
+        <div v-if="room.phase === 'results'">
+          <div class="results card" :class="resultColor(card)">
+            {{ card.text }}
+          </div>
+          <div class="username">
+            {{ players.find(player => player.id === card.id).username }}'s Card
+          </div>
+        </div>
+        <div class="gray picking card" v-else-if="room.phase === 'picking'" @click="pickCard(card.id)">
+          {{ card.text }}
+        </div>
+        <div class="gray card" v-else>
+          {{ card.id === user.id ? card.text : '' }}
         </div>
       </slide>
     </Carousel>
@@ -60,6 +71,22 @@ export default {
       })
       return cards
     }
+  },
+  methods: {
+    pickCard: function (id) {
+      this.websocket.send(JSON.stringify({
+        type: 'pickCard',
+        roomId: this.room.id,
+        body: id
+      }))
+    },
+    resultColor: function (card) {
+      if (this.room.winner === card.id) {
+        return 'green'
+      } else {
+        return 'red'
+      }
+    }
   }
 }
 </script>
@@ -94,6 +121,11 @@ export default {
   margin: 1rem auto;
 }
 
+.shown-cards .username {
+  text-align: center;
+  padding: 0.5rem 0;
+}
+
 .dark.card {
   background-color: #222222;
   color: white;
@@ -102,6 +134,18 @@ export default {
 .gray.card {
   background-color: #dddddd;
   border: none;
+}
+
+.red.card {
+  background-color: #ebbab7;
+}
+
+.green.card {
+  background-color: #bbedbd;
+}
+
+.gray.picking.card {
+  cursor: pointer;
 }
 
 .card {

@@ -1,6 +1,6 @@
 <template>
   <div class="hand-container">
-    <!-- Mouse/touch drag is a bit buggy -->
+    <!-- Mouse/touch drag is a bit buggy, so it's disabled -->
     <Carousel
       :paginationEnabled="false"
       :navigationEnabled="true"
@@ -13,7 +13,7 @@
       <slide v-for="card, index in cards" :key="index">
         <div
           class="light card"
-          :class="{ outlined: pickedCard && pickedCard.text === card }"
+          :class="{ outlined: selected && selected.text === card }"
           @click="pickCard(card, index)"
         >
           {{ card }}
@@ -22,7 +22,7 @@
     </Carousel>
     <b-button
       variant="dark"
-      :disabled="!pickedCard"
+      :disabled="!selected"
       v-if="userPlayer['card'] === ''"
       @click="submitCard"
       class="submit-button"
@@ -46,7 +46,7 @@ export default {
   },
   data: function () {
     return {
-      pickedCard: null
+      selected: null
     }
   },
   computed: {
@@ -57,10 +57,10 @@ export default {
     ...mapActions(['updateHand']),
     pickCard: function (text, index) {
       if (this.room.phase === 'playing') {
-        if (this.pickedCard !== text) {
-          this.pickedCard = { text: text, index: index }
+        if (this.selected !== text) {
+          this.selected = { text: text, index: index }
         } else {
-          this.pickedCard = null
+          this.selected = null
         }
       }
     },
@@ -68,13 +68,13 @@ export default {
       this.websocket.send(JSON.stringify({
         type: 'submitCard',
         roomId: this.room.id,
-        body: this.pickedCard.text
+        body: this.selected.text
       }))
 
       // Not in websocket action to have access to index
-      const newHand = this.cards.filter((el, i) => i !== this.pickedCard.index)
+      const newHand = this.cards.filter((el, i) => i !== this.selected.index)
       this.updateHand(newHand)
-      this.pickedCard = null
+      this.selected = null
     }
   }
 }
