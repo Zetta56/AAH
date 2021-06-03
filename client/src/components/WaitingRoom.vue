@@ -10,7 +10,7 @@
         <b-button class="add" @click="addBot">Add Bot +</b-button>
       </div>
     </div>
-    <b-button variant="dark" :disabled="this.players.length < 3" @click="startGame">
+    <b-button variant="dark" :disabled="this.players.length < 1" @click="startGame">
       Start Game
     </b-button>
   </div>

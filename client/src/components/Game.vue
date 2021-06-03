@@ -18,7 +18,9 @@
         <div class="dark card">{{ prompt }}</div>
       </slide>
       <slide v-for="card, index in submitted" :key="index">
-        <div class="gray card">{{ card.text }}</div>
+        <div class="gray card">
+          {{ room.phase === 'displaying' ? card : '' }}
+        </div>
       </slide>
     </Carousel>
     <Hand :cards="hand" />
@@ -42,7 +44,16 @@ export default {
     }
   },
   computed: {
-    ...mapState(['websocket', 'room', 'hand', 'submitted'])
+    ...mapState(['websocket', 'room', 'hand', 'players']),
+    submitted: function () {
+      const cards = []
+      this.players.forEach(player => {
+        if (player.card !== '') {
+          cards.push(player.card)
+        }
+      })
+      return cards
+    }
   }
 }
 </script>

@@ -22,5 +22,8 @@ export default {
   },
   updateSubmitted (state, submitted) {
     state.submitted = submitted
+  },
+  addSubmitted (state, submitted) {
+    state.submitted.push(submitted)
   }
 }

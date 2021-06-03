@@ -62,10 +62,11 @@ wss.on('connection', function connection(ws, req) {
         rooms[roomIndex]['players'].push({
           id: uuid(),
           username: body,
-          isBot: true
+          isBot: true,
+          card: ''
         });
         broadcast(rooms[roomIndex], connectedUsers, {
-          type: 'updateBots',
+          type: 'updatePlayers',
           players: rooms[roomIndex]['players']
         });
         break;
@@ -73,7 +74,7 @@ wss.on('connection', function connection(ws, req) {
       case 'deleteBot':
         deleteObject(rooms[roomIndex]['players'], 'id', body);
         broadcast(rooms[roomIndex], connectedUsers, {
-          type: 'updateBots',
+          type: 'updatePlayers',
           players: rooms[roomIndex]['players']
         });
         break;
@@ -87,22 +88,21 @@ wss.on('connection', function connection(ws, req) {
         break;
 
       case 'submitCard':
-        // console.log(rooms[roomIndex]['players'][id])
-        // rooms[roomIndex]['players'][id]['card'] = body;
+        rooms[roomIndex]['players'].find(user => user.id === id).card = body;
         connectedUsers[id].send(JSON.stringify({
-          type: 'updatePhase',
-          phase: 'waiting'
+          type: 'updatePlayers',
+          players: rooms[roomIndex]['players']
         }));
         broadcast(rooms[roomIndex], connectedUsers, {
           type: 'submitCard',
-          card: rooms[roomIndex]['players'][id]['card']
+          card: body
         });
-        // if(rooms[roomIndex]['submittedCards'].length === rooms[roomIndex]['players'].length) {
-        //   broadcast(rooms[roomIndex], connectedUsers, {
-        //     type: 'updatePhase',
-        //     phase: 'displaying'
-        //   });
-        // }
+        if(rooms[roomIndex]['players'].every(player => player.card !== '' || player.isBot)) {
+          broadcast(rooms[roomIndex], connectedUsers, {
+            type: 'updatePhase',
+            phase: 'displaying'
+          });
+        }
         break;
 
       case 'leaveRoom': {

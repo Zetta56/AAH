@@ -23,7 +23,7 @@
     <b-button
       variant="dark"
       :disabled="!pickedCard"
-      v-if="room.phase === 'playing'"
+      v-if="players.find(player => player.id === user.id)['card'] === ''"
       @click="submitCard"
       class="submit-button"
     >
@@ -50,7 +50,7 @@ export default {
     }
   },
   computed: {
-    ...mapState(['websocket', 'room'])
+    ...mapState(['websocket', 'user', 'room', 'players'])
   },
   methods: {
     ...mapActions(['updateHand']),

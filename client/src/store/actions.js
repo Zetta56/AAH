@@ -37,8 +37,11 @@ export default {
             context.commit('updatePlayers', data.players)
             break
           }
-          case 'updateBots':
+          case 'updatePlayers':
             context.commit('updatePlayers', data.players)
+            break
+          case 'updatePhase':
+            context.commit('updatePhase', data.phase)
             break
           case 'startRound':
             context.commit('updatePhase', data.phase)
