@@ -45,7 +45,7 @@ export default {
     },
     startGame: function () {
       this.websocket.send(JSON.stringify({
-        type: 'startGame',
+        type: 'startRound',
         roomId: this.room.id
       }))
     }

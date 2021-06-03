@@ -4,7 +4,6 @@ export default {
   websocket: null,
   room: null,
   players: [],
-  phase: '', // Options: playing, waiting, displaying
   hand: [
     'card 1',
     'card 2',

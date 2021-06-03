@@ -4,8 +4,8 @@
     <div v-if="isLoggedIn !== null" :style="bgColor" class="content">
       <Login v-if="isLoggedIn === false" />
       <RoomList v-else-if="!room" />
-      <WaitingRoom v-else-if="!room.started" />
-      <Game v-else-if="!room.finished" />
+      <WaitingRoom v-else-if="room.phase === 'waiting'" />
+      <Game v-else-if="room.phase !== 'finished'" />
     </div>
   </div>
 </template>

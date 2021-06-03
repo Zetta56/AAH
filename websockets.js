@@ -24,10 +24,9 @@ wss.on('connection', function connection(ws, req) {
         const room = {
           name: body.name,
           id: uuid(),
-          started: false,
-          submittedCards: [],
+          phase: 'waiting',
           access: body.access,
-          players: [{ id: id, username: username, isBot: false }]
+          players: [{ id: id, username: username, isBot: false, card: '' }]
         };
         rooms.push(room);
         if(room.access === 'private') {
@@ -49,7 +48,8 @@ wss.on('connection', function connection(ws, req) {
         rooms[roomIndex]['players'].push({
           id: id,
           username: username,
-          isBot: false
+          isBot: false,
+          card: ''
         });
         broadcast(rooms[roomIndex], connectedUsers, {
           type: 'join',
@@ -78,37 +78,31 @@ wss.on('connection', function connection(ws, req) {
         });
         break;
 
-      case 'startGame':
-        rooms[roomIndex]['started'] = true;
+      case 'startRound':
+        rooms[roomIndex]['phase'] = 'playing';
         broadcast(rooms[roomIndex], connectedUsers, {
-          type: 'startGame',
-          room: omit(rooms[roomIndex], 'players')
-        })
-        break;
-
-      case 'updatePhase':
-        broadcast(rooms[roomIndex], connectedUsers, {
-          type: 'updatePhase',
-          phase: body
+          type: 'startRound',
+          phase: rooms[roomIndex]['phase']
         })
         break;
 
       case 'submitCard':
-        rooms[roomIndex]['submittedCards'].push({ text: body, id: id });
+        // console.log(rooms[roomIndex]['players'][id])
+        // rooms[roomIndex]['players'][id]['card'] = body;
         connectedUsers[id].send(JSON.stringify({
           type: 'updatePhase',
           phase: 'waiting'
         }));
         broadcast(rooms[roomIndex], connectedUsers, {
           type: 'submitCard',
-          cards: rooms[roomIndex]['submittedCards']
+          card: rooms[roomIndex]['players'][id]['card']
         });
-        if(rooms[roomIndex]['submittedCards'].length === rooms[roomIndex]['players'].length) {
-          broadcast(rooms[roomIndex], connectedUsers, {
-            type: 'updatePhase',
-            phase: 'displaying'
-          });
-        }
+        // if(rooms[roomIndex]['submittedCards'].length === rooms[roomIndex]['players'].length) {
+        //   broadcast(rooms[roomIndex], connectedUsers, {
+        //     type: 'updatePhase',
+        //     phase: 'displaying'
+        //   });
+        // }
         break;
 
       case 'leaveRoom': {

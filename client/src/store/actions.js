@@ -40,20 +40,11 @@ export default {
           case 'updateBots':
             context.commit('updatePlayers', data.players)
             break
-          case 'startGame': {
-            context.commit('updateRoom', data.room)
-            context.state.websocket.send(JSON.stringify({
-              type: 'updatePhase',
-              roomId: context.state.room.id,
-              body: 'playing'
-            }))
-            break
-          }
-          case 'updatePhase':
+          case 'startRound':
             context.commit('updatePhase', data.phase)
             break
           case 'submitCard':
-            context.commit('updateSubmitted', data.cards)
+            context.commit('addSubmitted', data.card)
             break
           case 'leave':
             if (data.id === context.state.user.id) {

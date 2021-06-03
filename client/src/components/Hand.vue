@@ -23,7 +23,7 @@
     <b-button
       variant="dark"
       :disabled="!pickedCard"
-      v-if="phase === 'playing'"
+      v-if="room.phase === 'playing'"
       @click="submitCard"
       class="submit-button"
     >
@@ -50,12 +50,12 @@ export default {
     }
   },
   computed: {
-    ...mapState(['websocket', 'room', 'phase'])
+    ...mapState(['websocket', 'room'])
   },
   methods: {
     ...mapActions(['updateHand']),
     pickCard: function (text, index) {
-      if (this.phase === 'playing') {
+      if (this.room.phase === 'playing') {
         if (this.pickedCard !== text) {
           this.pickedCard = { text: text, index: index }
         } else {

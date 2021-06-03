@@ -11,11 +11,11 @@ export default {
   updateRoom (state, room) {
     state.room = room
   },
+  updatePhase (state, phase) {
+    state.room.phase = phase
+  },
   updatePlayers (state, players) {
     state.players = players
-  },
-  updatePhase (state, phase) {
-    state.phase = phase
   },
   updateHand (state, hand) {
     state.hand = hand
