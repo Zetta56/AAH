@@ -47,7 +47,7 @@ export default {
   },
   computed: {
     ...mapState(['websocket', 'user', 'room', 'players']),
-    ...mapGetters(['userPlayer']),
+    ...mapGetters(['userPlayer', 'winner']),
     submitted: function () {
       const cards = []
       this.players.forEach(player => {
@@ -69,7 +69,7 @@ export default {
       }
     },
     getResultColor: function (card) {
-      if (this.room.winner === card.id) {
+      if (this.winner.id === card.id) {
         return { backgroundColor: '#bbedbd' }
       } else {
         return { backgroundColor: '#ebbab7' }

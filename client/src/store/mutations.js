@@ -14,9 +14,6 @@ export default {
   updatePhase (state, phase) {
     state.room.phase = phase
   },
-  updateWinner (state, winner) {
-    state.room.winner = winner
-  },
   updatePlayers (state, players) {
     state.players = players
   },

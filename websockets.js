@@ -3,7 +3,8 @@ const WebSocket = require('ws'),
       querystring = require('querystring'),
       { v4: uuid } = require('uuid'),
       wss = new WebSocket.Server({ noServer: true }),
-      { deleteObject, omit, broadcast, leaveRoom, rotateCzar } = require('./helpers'),
+      { Room, Player } = require('./schemas'),
+      h = require('./helpers'),
       rooms = [],
       connectedUsers = {}, // { userId: websocket }
       passwords = {};      // { roomId: password }
@@ -21,28 +22,14 @@ wss.on('connection', function connection(ws, req) {
     
     switch(type) {
       case 'createRoom':
-        const room = {
-          name: body.name,
-          id: uuid(),
-          phase: 'waiting',
-          access: body.access,
-          winner: '',
-          players: [{
-            id: id,
-            username: username,
-            isBot: false,
-            czar: false,
-            score: 0,
-            card: ''
-          }]
-        };
+        const room = new Room(body.name, body.access, new Player(id, username, false));
         rooms.push(room);
         if(room.access === 'private') {
           passwords[room.id] = body.password;
         }
         ws.send(JSON.stringify({
           type: 'join',
-          room: omit(room, 'players'),
+          room: h.omit(room, 'players'),
           players: room['players']
         }));
         break;
@@ -53,52 +40,38 @@ wss.on('connection', function connection(ws, req) {
             body.password !== passwords[rooms[roomIndex].id])) {
           return;
         }
-        rooms[roomIndex]['players'].push({
-          id: id,
-          username: username,
-          isBot: false,
-          czar: false,
-          score: 0,
-          card: ''
-        });
-        broadcast(rooms[roomIndex], connectedUsers, {
+        rooms[roomIndex]['players'].push(new Player(id, username, false));
+        h.broadcast(rooms[roomIndex], connectedUsers, {
           type: 'join',
-          room: omit(rooms[roomIndex], 'players'),
+          room: h.omit(rooms[roomIndex], 'players'),
           players: rooms[roomIndex]['players']
         });
         break;
 
       case 'addBot':
-        rooms[roomIndex]['players'].push({
-          id: uuid(),
-          username: body,
-          isBot: true,
-          czar: false,
-          score: 0,
-          card: ''
-        });
-        broadcast(rooms[roomIndex], connectedUsers, {
+        rooms[roomIndex]['players'].push(new Player(uuid(), body, true));
+        h.broadcast(rooms[roomIndex], connectedUsers, {
           type: 'updatePlayers',
           players: rooms[roomIndex]['players']
         });
         break;
 
       case 'deleteBot':
-        deleteObject(rooms[roomIndex]['players'], 'id', body);
-        broadcast(rooms[roomIndex], connectedUsers, {
+        h.deleteObject(rooms[roomIndex]['players'], 'id', body);
+        h.broadcast(rooms[roomIndex], connectedUsers, {
           type: 'updatePlayers',
           players: rooms[roomIndex]['players']
         });
         break;
 
       case 'startRound': {
-        rotateCzar(rooms[roomIndex]);
+        h.rotateCzar(rooms[roomIndex]);
         rooms[roomIndex]['winner'] = '';
         rooms[roomIndex]['phase'] = 'playing';
         rooms[roomIndex]['players'].forEach(player => {
           player.card = '';
         });
-        broadcast(rooms[roomIndex], connectedUsers, {
+        h.broadcast(rooms[roomIndex], connectedUsers, {
           type: 'startRound',
           phase: rooms[roomIndex]['phase'],
           winner: rooms[roomIndex]['winner'],
@@ -109,12 +82,12 @@ wss.on('connection', function connection(ws, req) {
 
       case 'submitCard':
         rooms[roomIndex]['players'].find(user => user.id === id).card = body;
-        broadcast(rooms[roomIndex], connectedUsers, {
+        h.broadcast(rooms[roomIndex], connectedUsers, {
           type: 'updatePlayers',
           players: rooms[roomIndex]['players']
         });
         if(rooms[roomIndex]['players'].every(player => player.card !== '' || player.isBot || player.czar)) {
-          broadcast(rooms[roomIndex], connectedUsers, {
+          h.broadcast(rooms[roomIndex], connectedUsers, {
             type: 'updatePhase',
             phase: 'picking'
           });
@@ -122,24 +95,22 @@ wss.on('connection', function connection(ws, req) {
         break;
 
       case 'pickCard':
-        rooms[roomIndex]['winner'] = body;
-        rooms[roomIndex]['players'].find(player => player.id === body).score += 1;
-        broadcast(rooms[roomIndex], connectedUsers, {
+        const cardOwner = rooms[roomIndex]['players'].find(player => player.id === body);
+        cardOwner['winner'] = true;
+        cardOwner['score'] += 1
+        
+        h.broadcast(rooms[roomIndex], connectedUsers, {
           type: 'updatePlayers',
           players: rooms[roomIndex]['players']
         });
-        broadcast(rooms[roomIndex], connectedUsers, {
-          type: 'updateWinner',
-          winner: body
-        });
-        broadcast(rooms[roomIndex], connectedUsers, {
+        h.broadcast(rooms[roomIndex], connectedUsers, {
           type: 'updatePhase',
           phase: `results`
         });
         break;
 
       case 'leaveRoom': {
-        leaveRoom(rooms, roomIndex, connectedUsers, passwords, id);
+        h.leaveRoom(rooms, roomIndex, connectedUsers, passwords, id);
         connectedUsers[id].send(JSON.stringify({
           type: 'leave',
           id: id
@@ -153,7 +124,7 @@ wss.on('connection', function connection(ws, req) {
     // Pull user from room
     for(let i = 0; i < rooms.length; i++) {
       if(rooms[i]['players'].some(player => player.id === id)) {
-        leaveRoom(rooms, i, connectedUsers, passwords, id);
+        h.leaveRoom(rooms, i, connectedUsers, passwords, id);
         break;
       }
     }

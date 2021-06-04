@@ -43,9 +43,6 @@ export default {
           case 'updatePhase':
             context.commit('updatePhase', data.phase)
             break
-          case 'updateWinner':
-            context.commit('updateWinner', data.winner)
-            break
           case 'startRound':
             context.commit('updatePhase', data.phase)
             context.commit('updatePlayers', data.players)
