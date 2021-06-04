@@ -4,54 +4,27 @@
       <b-button variant="dark" class="scoreboard-button">Scoreboard</b-button>
       <span class="timer">30</span>
     </div>
-    <Carousel
-      :paginationEnabled="false"
-      :navigationEnabled="true"
-      :centerMode="true"
-      :mouseDrag="false"
-      :touchDrag="false"
-      :perPageCustom="[[1200, 4], [991, 3], [580, 2], [0, 1]]"
-      :speed="250"
-      class="shown-cards"
-    >
-      <slide>
-        <div class="dark card">{{ prompt }}</div>
-      </slide>
-      <slide v-for="card, index in submitted" :key="index">
-        <div v-if="room.phase === 'results'">
-          <div class="results card" :class="resultColor(card)">
-            {{ card.text }}
-          </div>
-          <div class="username">
-            {{ players.find(player => player.id === card.id).username }}'s Card
-          </div>
-        </div>
-        <div class="gray picking card" v-else-if="room.phase === 'picking'" @click="pickCard(card.id)">
-          {{ card.text }}
-        </div>
-        <div class="gray card" v-else>
-          {{ card.id === user.id ? card.text : '' }}
-        </div>
-      </slide>
-    </Carousel>
-    <Hand :cards="hand" v-if="!userPlayer.czar" />
-    <div class="czar-message" v-else>
+    <SharedCards />
+    <Hand v-if="!userPlayer.czar" />
+    <div v-else class="czar-message">
       <span>
         You are the Card Czar <b-icon-gem />
       </span>
     </div>
+    <b-button variant="dark" class="next-button" @click="startRound" v-if="room.phase === 'results'">
+      Next Round
+    </b-button>
   </b-container>
 </template>
 
 <script>
 import { mapState, mapGetters } from 'vuex'
-import { Carousel, Slide } from 'vue-carousel'
 import Hand from './Hand'
+import SharedCards from './SharedCards'
 
 export default {
   components: {
-    Carousel,
-    Slide,
+    SharedCards,
     Hand
   },
   data: function () {
@@ -61,31 +34,14 @@ export default {
   },
   computed: {
     ...mapState(['websocket', 'user', 'room', 'hand', 'players']),
-    ...mapGetters(['userPlayer']),
-    submitted: function () {
-      const cards = []
-      this.players.forEach(player => {
-        if (player.card !== '') {
-          cards.push({ text: player.card, id: player.id })
-        }
-      })
-      return cards
-    }
+    ...mapGetters(['userPlayer'])
   },
   methods: {
-    pickCard: function (id) {
+    startRound: function () {
       this.websocket.send(JSON.stringify({
-        type: 'pickCard',
-        roomId: this.room.id,
-        body: id
+        type: 'startRound',
+        roomId: this.room.id
       }))
-    },
-    resultColor: function (card) {
-      if (this.room.winner === card.id) {
-        return 'green'
-      } else {
-        return 'red'
-      }
     }
   }
 }
@@ -117,44 +73,6 @@ export default {
   border-radius: 0.25rem;
 }
 
-.shown-cards {
-  margin: 1rem auto;
-}
-
-.shown-cards .username {
-  text-align: center;
-  padding: 0.5rem 0;
-}
-
-.dark.card {
-  background-color: #222222;
-  color: white;
-}
-
-.gray.card {
-  background-color: #dddddd;
-  border: none;
-}
-
-.red.card {
-  background-color: #ebbab7;
-}
-
-.green.card {
-  background-color: #bbedbd;
-}
-
-.gray.picking.card {
-  cursor: pointer;
-}
-
-.card {
-  width: calc(100% - 1rem);
-  height: 275px;
-  padding: 1rem;
-  margin: auto;
-}
-
 .czar-message {
   display: flex;
   justify-content: center;
@@ -169,6 +87,11 @@ export default {
 
 .bi-gem {
   margin: 0 0.75rem;
+}
+
+.next-button {
+  display: block;
+  margin: 1rem auto;
 }
 
 >>> .VueCarousel-navigation-button {

@@ -1,0 +1,112 @@
+<template>
+  <Carousel
+    :paginationEnabled="false"
+    :navigationEnabled="true"
+    :centerMode="true"
+    :mouseDrag="false"
+    :touchDrag="false"
+    :perPageCustom="[[1200, 4], [991, 3], [580, 2], [0, 1]]"
+    :speed="250"
+    class="shared-cards"
+  >
+    <slide>
+      <div class="dark card">{{ prompt }}</div>
+    </slide>
+    <slide v-for="card, index in submitted" :key="index">
+      <div v-if="room.phase === 'results'">
+        <div class="results card" :style="getResultColor(card)">
+          {{ card.text }}
+        </div>
+        <div class="username">
+          {{ players.find(player => player.id === card.id).username }}'s Card
+        </div>
+      </div>
+      <div v-else-if="room.phase === 'picking'" class="gray picking card" @click="pickCard(card.id)">
+        {{ card.text }}
+      </div>
+      <div v-else class="gray card">
+        {{ card.id === user.id ? card.text : '' }}
+      </div>
+    </slide>
+  </Carousel>
+</template>
+
+<script>
+import { mapState, mapGetters } from 'vuex'
+import { Carousel, Slide } from 'vue-carousel'
+
+export default {
+  components: {
+    Carousel,
+    Slide
+  },
+  data: function () {
+    return {
+      prompt: 'Default Prompt'
+    }
+  },
+  computed: {
+    ...mapState(['websocket', 'user', 'room', 'players']),
+    ...mapGetters(['userPlayer']),
+    submitted: function () {
+      const cards = []
+      this.players.forEach(player => {
+        if (player.card !== '') {
+          cards.push({ text: player.card, id: player.id })
+        }
+      })
+      return cards
+    }
+  },
+  methods: {
+    pickCard: function (id) {
+      if (this.userPlayer.czar) {
+        this.websocket.send(JSON.stringify({
+          type: 'pickCard',
+          roomId: this.room.id,
+          body: id
+        }))
+      }
+    },
+    getResultColor: function (card) {
+      if (this.room.winner === card.id) {
+        return { backgroundColor: '#bbedbd' }
+      } else {
+        return { backgroundColor: '#ebbab7' }
+      }
+    }
+  }
+}
+</script>
+
+<style scoped>
+.shared-cards {
+  margin: 1rem auto;
+}
+
+.shared-cards .username {
+  text-align: center;
+  padding: 0.5rem 0;
+}
+
+.dark.card {
+  background-color: #222222;
+  color: white;
+}
+
+.gray.card {
+  background-color: #dddddd;
+  border: none;
+}
+
+.gray.picking.card {
+  cursor: pointer;
+}
+
+.card {
+  width: calc(100% - 1rem);
+  height: 275px;
+  padding: 1rem;
+  margin: auto;
+}
+</style>

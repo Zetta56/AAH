@@ -129,12 +129,12 @@ wss.on('connection', function connection(ws, req) {
           players: rooms[roomIndex]['players']
         });
         broadcast(rooms[roomIndex], connectedUsers, {
-          type: 'updatePhase',
-          phase: `results`
-        });
-        broadcast(rooms[roomIndex], connectedUsers, {
           type: 'updateWinner',
           winner: body
+        });
+        broadcast(rooms[roomIndex], connectedUsers, {
+          type: 'updatePhase',
+          phase: `results`
         });
         break;
 
