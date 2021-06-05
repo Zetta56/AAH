@@ -66,10 +66,10 @@ wss.on('connection', function connection(ws, req) {
 
       case 'startRound': {
         h.rotateCzar(rooms[roomIndex]);
-        rooms[roomIndex]['winner'] = '';
         rooms[roomIndex]['phase'] = 'playing';
         rooms[roomIndex]['players'].forEach(player => {
           player.card = '';
+          player.winner = false;
         });
         h.broadcast(rooms[roomIndex], connectedUsers, {
           type: 'startRound',
@@ -97,7 +97,7 @@ wss.on('connection', function connection(ws, req) {
       case 'pickCard':
         const cardOwner = rooms[roomIndex]['players'].find(player => player.id === body);
         cardOwner['winner'] = true;
-        cardOwner['score'] += 1
+        cardOwner['score'] += 1;
         
         h.broadcast(rooms[roomIndex], connectedUsers, {
           type: 'updatePlayers',
@@ -106,6 +106,14 @@ wss.on('connection', function connection(ws, req) {
         h.broadcast(rooms[roomIndex], connectedUsers, {
           type: 'updatePhase',
           phase: `results`
+        });
+        break;
+
+      case 'endGame':
+        rooms[roomIndex]['phase'] = 'waiting';
+        h.broadcast(rooms[roomIndex], connectedUsers, {
+          type: 'updatePhase',
+          phase: `waiting`
         });
         break;
 

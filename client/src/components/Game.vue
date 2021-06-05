@@ -1,7 +1,23 @@
 <template>
-  <b-container class="game-container">
+  <b-container class="game-container" ref="test">
+    <b-modal
+      id="scoreboard"
+      ref="scoreboard"
+      title="Scoreboard"
+      :hide-footer="true"
+      centered
+    >
+      <div v-for="player, index in players" :key="index" class="row">
+        <span class="username">
+          {{ player.username }} <b-icon-gem v-if="player.czar" />
+        </span>
+        <span class="score">{{ player.score }}</span>
+      </div>
+    </b-modal>
     <div class="top-row">
-      <b-button variant="dark" class="scoreboard-button">Scoreboard</b-button>
+      <b-button variant="dark" class="scoreboard-button" v-b-modal.scoreboard>
+        Scoreboard
+      </b-button>
       <span class="timer">30</span>
     </div>
     <SharedCards />
@@ -11,7 +27,10 @@
         You are the Card Czar <b-icon-gem />
       </span>
     </div>
-    <b-button variant="dark" class="next-button" @click="startRound" v-if="room.phase === 'results'">
+    <b-button variant="dark" class="next-button" @click="endGame" v-if="finished">
+      Replay
+    </b-button>
+    <b-button variant="dark" class="next-button" @click="startRound" v-else-if="room.phase === 'results'">
       Next Round
     </b-button>
   </b-container>
@@ -29,6 +48,7 @@ export default {
   },
   data: function () {
     return {
+      finished: false,
       prompt: 'Default Prompt'
     }
   },
@@ -42,6 +62,22 @@ export default {
         type: 'startRound',
         roomId: this.room.id
       }))
+    },
+    endGame: function () {
+      this.websocket.send(JSON.stringify({
+        type: 'endGame',
+        roomId: this.room.id
+      }))
+    }
+  },
+  watch: {
+    '$store.state.players': function () {
+      this.players.forEach(player => {
+        if (player.score >= 2) {
+          this.$refs.scoreboard.show()
+          this.finished = true
+        }
+      })
     }
   }
 }
@@ -71,6 +107,23 @@ export default {
   background-color: #343a40;
   color: #ffffff;
   border-radius: 0.25rem;
+}
+
+>>> #scoreboard {
+  font-size: 20px;
+  align-items: center;
+}
+
+>>> #scoreboard .modal-dialog {
+  width: 350px;
+}
+
+>>> #scoreboard .row {
+  padding: 0.5rem 1rem;
+}
+
+>>> #scoreboard .score {
+  margin-left: auto;
 }
 
 .czar-message {
