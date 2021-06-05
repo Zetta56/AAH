@@ -5,9 +5,6 @@ export default {
   updateLoginStatus (context, loginStatus) {
     context.commit('updateLoginStatus', loginStatus)
   },
-  updateHand (context, hand) {
-    context.commit('updateHand', hand)
-  },
   connectWebsocket (context, { token, callback, error }) {
     if (token) {
       let baseUrl = process.env.VUE_APP_BACKEND_URL || window.location.origin
@@ -44,7 +41,7 @@ export default {
             context.commit('updatePhase', data.phase)
             break
           case 'startRound':
-            context.commit('updatePhase', data.phase)
+            context.commit('updateRoom', data.room)
             context.commit('updatePlayers', data.players)
             break
           case 'leave':

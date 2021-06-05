@@ -10,7 +10,7 @@
     class="shared-cards"
   >
     <slide>
-      <div class="dark card">{{ prompt }}</div>
+      <div class="dark card">{{ room.prompt }}</div>
     </slide>
     <slide v-for="card, index in submitted" :key="index">
       <div v-if="room.phase === 'results'">
@@ -39,11 +39,6 @@ export default {
   components: {
     Carousel,
     Slide
-  },
-  data: function () {
-    return {
-      prompt: 'Default Prompt'
-    }
   },
   computed: {
     ...mapState(['websocket', 'user', 'room', 'players']),

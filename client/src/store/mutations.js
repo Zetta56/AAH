@@ -16,8 +16,5 @@ export default {
   },
   updatePlayers (state, players) {
     state.players = players
-  },
-  updateHand (state, hand) {
-    state.hand = hand
   }
 }

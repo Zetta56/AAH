@@ -10,10 +10,10 @@
       :speed="250"
       class="hand"
     >
-      <slide v-for="card, index in hand" :key="index">
+      <slide v-for="card, index in userPlayer.hand" :key="index">
         <div
           class="light card"
-          :class="{ outlined: selected && selected.text === card }"
+          :class="{ outlined: selected && selected.index === index }"
           @click="pickCard(card, index)"
         >
           {{ card }}
@@ -47,17 +47,17 @@ export default {
     }
   },
   computed: {
-    ...mapState(['websocket', 'user', 'room', 'players', 'hand']),
+    ...mapState(['websocket', 'user', 'room', 'players']),
     ...mapGetters(['userPlayer'])
   },
   methods: {
     ...mapActions(['updateHand']),
     pickCard: function (text, index) {
       if (this.room.phase === 'playing') {
-        if (this.selected !== text) {
-          this.selected = { text: text, index: index }
-        } else {
+        if (this.selected && this.selected.index === index) {
           this.selected = null
+        } else {
+          this.selected = { text: text, index: index }
         }
       }
     },
@@ -69,8 +69,8 @@ export default {
       }))
 
       // Not in websocket action to have access to index
-      const newHand = this.hand.filter((el, i) => i !== this.selected.index)
-      this.updateHand(newHand)
+      // const newHand = this.hand.filter((el, i) => i !== this.selected.index)
+      // this.updateHand(newHand)
       this.selected = null
     }
   }

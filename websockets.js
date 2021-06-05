@@ -22,6 +22,7 @@ wss.on('connection', function connection(ws, req) {
     
     switch(type) {
       case 'createRoom':
+        // Create and push room to rooms and passwords
         const room = new Room(body.name, body.access, new Player(id, username, false));
         rooms.push(room);
         if(room.access === 'private') {
@@ -65,52 +66,62 @@ wss.on('connection', function connection(ws, req) {
         break;
 
       case 'startRound': {
+        // Reset game state to the start of a round
         h.rotateCzar(rooms[roomIndex]);
         rooms[roomIndex]['phase'] = 'playing';
+        rooms[roomIndex]['prompt'] = h.generateCard();
         rooms[roomIndex]['players'].forEach(player => {
           player.card = '';
           player.winner = false;
+          if(!player.isBot) {
+            while(player.hand.length < 5) {
+              player.hand.push(h.generateCard());
+            }
+          }
         });
         h.broadcast(rooms[roomIndex], connectedUsers, {
           type: 'startRound',
-          phase: rooms[roomIndex]['phase'],
-          winner: rooms[roomIndex]['winner'],
+          room: h.omit(rooms[roomIndex], 'players'),
           players: rooms[roomIndex]['players']
+        })
+        // Bots randomly play a card
+        rooms[roomIndex]['players'].forEach(player => {
+          if(player.isBot && !player.czar) {
+            player.card = h.generateCard();
+            h.broadcast(rooms[roomIndex], connectedUsers, {
+              type: 'updatePlayers',
+              players: rooms[roomIndex]['players']
+            });
+            h.checkPlayingFinished(rooms[roomIndex], connectedUsers);
+          }
         })
         break;
       }
 
       case 'submitCard':
-        rooms[roomIndex]['players'].find(user => user.id === id).card = body;
+        // Move card from hand to played cards
+        const foundPlayer = rooms[roomIndex]['players'].find(player => player.id === id);
+        foundPlayer.card = body;
+        foundPlayer.hand.splice(foundPlayer.hand.indexOf(body), 1);
         h.broadcast(rooms[roomIndex], connectedUsers, {
           type: 'updatePlayers',
           players: rooms[roomIndex]['players']
         });
-        if(rooms[roomIndex]['players'].every(player => player.card !== '' || player.isBot || player.czar)) {
-          h.broadcast(rooms[roomIndex], connectedUsers, {
-            type: 'updatePhase',
-            phase: 'picking'
-          });
-        }
+        h.checkPlayingFinished(rooms[roomIndex], connectedUsers);
         break;
 
       case 'pickCard':
-        const cardOwner = rooms[roomIndex]['players'].find(player => player.id === body);
-        cardOwner['winner'] = true;
-        cardOwner['score'] += 1;
-        
-        h.broadcast(rooms[roomIndex], connectedUsers, {
-          type: 'updatePlayers',
-          players: rooms[roomIndex]['players']
-        });
-        h.broadcast(rooms[roomIndex], connectedUsers, {
-          type: 'updatePhase',
-          phase: `results`
-        });
+        // Make picked card's owner the winner of the round
+        const winner = rooms[roomIndex]['players'].find(player => player.id === body);
+        h.pickWinner(rooms[roomIndex], connectedUsers, winner);
         break;
 
       case 'endGame':
+        // Resets game state to start of game
         rooms[roomIndex]['phase'] = 'waiting';
+        rooms[roomIndex]['players'].forEach(player => {
+          player.score = 0;
+        })
         h.broadcast(rooms[roomIndex], connectedUsers, {
           type: 'updatePhase',
           phase: `waiting`

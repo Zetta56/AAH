@@ -4,9 +4,10 @@ class Room {
   constructor(name, access, initialPlayer) {
     this.id = uuid(),
     this.name = name,
-    this.phase = 'waiting',
     this.access = access,
+    this.phase = 'waiting',
     this.winner = '',
+    this.prompt = '',
     this.players = [initialPlayer]
   }
 };
@@ -20,6 +21,7 @@ class Player {
     this.winner = false,
     this.score = 0,
     this.card = ''
+    this.hand = []
   }
 }
 

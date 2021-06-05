@@ -59,8 +59,50 @@ const rotateCzar = (room) => {
   room['players'][nextCzar]['czar'] = true;
 }
 
+// Generates a random card
+const generateCard = () => {
+  return 'card1';
+}
+
+// If all players have played a card, moves to picking phase (and pick card if czar is a bot)
+const checkPlayingFinished = (room, websockets) => {
+  if(room['players'].every(player => player.card !== '' || player.czar)) {
+    broadcast(room, websockets, {
+      type: 'updatePhase',
+      phase: 'picking'
+    });
+  }
+  for(let player of room['players']) {
+    if(player.czar && player.isBot) {
+      let winnerIndex;
+      do {
+        winnerIndex = Math.floor(Math.random() * room['players'].length);
+      } while(room['players'][winnerIndex]['czar']);
+      pickWinner(room, websockets, room['players'][winnerIndex]);
+      break;
+    }
+  }
+}
+
+const pickWinner = (room, websockets, player) => {
+  player.winner = true;
+  player.score += 1;
+  
+  broadcast(room, websockets, {
+    type: 'updatePlayers',
+    players: room.players
+  });
+  broadcast(room, websockets, {
+    type: 'updatePhase',
+    phase: `results`
+  });
+}
+
 module.exports.deleteObject = deleteObject;
 module.exports.omit = omit;
 module.exports.broadcast = broadcast;
 module.exports.leaveRoom = leaveRoom;
 module.exports.rotateCzar = rotateCzar;
+module.exports.generateCard = generateCard;
+module.exports.checkPlayingFinished = checkPlayingFinished;
+module.exports.pickWinner = pickWinner;
