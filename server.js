@@ -7,7 +7,8 @@ const http = require('http'),
       path = require('path'),
       querystring = require('querystring'),
       { v4: uuid } = require('uuid'),
-      { wss, rooms, connectedUsers } = require('./websockets');
+      wss = require('./websockets'),
+      { rooms, users } = require('./store');
 
 /** Settings */
 const app = express();
@@ -44,8 +45,9 @@ server.on('upgrade', (req, socket, head) => {
     const token = querystring.parse(req.url.substring(2)).token;
     const { id } = jwt.verify(token, process.env.JWT_SECRET);
 
-    if(!(id in connectedUsers)) {
+    if(!(id in users)) {
       wss.handleUpgrade(req, socket, head, (ws) => {
+        users[id] = ws;
         wss.emit('connection', ws, req);
       });
     // Prevent user from connecting multiple times

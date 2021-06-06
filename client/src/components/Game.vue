@@ -9,7 +9,7 @@
     >
       <div v-for="player, index in players" :key="index" class="row">
         <span class="username">
-          {{ player.username }} <b-icon-gem v-if="player.czar" />
+          {{ player.username }} <b-icon-gem v-if="player.isCzar" />
         </span>
         <span class="score">{{ player.score }}</span>
       </div>
@@ -21,7 +21,7 @@
       <span class="timer">30</span>
     </div>
     <SharedCards />
-    <Hand v-if="!userPlayer.czar" />
+    <Hand v-if="!userPlayer.isCzar" />
     <div v-else class="czar-message">
       <span>
         You are the Card Czar <b-icon-gem />
@@ -73,7 +73,7 @@ export default {
   watch: {
     '$store.state.players': function () {
       this.players.forEach(player => {
-        if (player.score >= 2) {
+        if (player.score >= 3) {
           this.$refs.scoreboard.show()
           this.finished = true
         }

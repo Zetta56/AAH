@@ -55,7 +55,7 @@ export default {
   },
   methods: {
     pickCard: function (id) {
-      if (this.userPlayer.czar) {
+      if (this.userPlayer.isCzar) {
         this.websocket.send(JSON.stringify({
           type: 'pickCard',
           roomId: this.room.id,

@@ -67,10 +67,6 @@ export default {
         roomId: this.room.id,
         body: this.selected.text
       }))
-
-      // Not in websocket action to have access to index
-      // const newHand = this.hand.filter((el, i) => i !== this.selected.index)
-      // this.updateHand(newHand)
       this.selected = null
     }
   }
