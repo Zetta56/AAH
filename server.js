@@ -34,7 +34,7 @@ app.post('/api/authenticate', (req, res) => {
   }
 })
 app.get('/api/rooms', (req, res) => {
-  res.json(rooms);
+  res.json(rooms.filter(room => room.phase === 'waiting'));
 })
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, './client/dist/index.html'));
@@ -45,9 +45,9 @@ server.on('upgrade', (req, socket, head) => {
     const token = querystring.parse(req.url.substring(2)).token;
     const { id } = jwt.verify(token, process.env.JWT_SECRET);
 
-    if(!(id in users)) {
+    if(!users.some(user => user.id === id)) {
       wss.handleUpgrade(req, socket, head, (ws) => {
-        users[id] = ws;
+        users.push({ id: id, ws: ws, inRoom: false });
         wss.emit('connection', ws, req);
       });
     // Prevent user from connecting multiple times

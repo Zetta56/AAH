@@ -18,30 +18,50 @@ const omit = (obj, key) => {
 const broadcast = (roomIndex, message) => {
   rooms[roomIndex]['players'].forEach(player => {
     if(!player.isBot) {
-      users[player.id].send(JSON.stringify(message));
+      users.find(user => user.id === player.id).ws.send(JSON.stringify(message));
     }
   });
 }
 
-// Removes player from room and broadcasts their disconnection to other players
+// Broadcast room creation/deletion to those still selecting rooms
+const updateWaitingRooms = (room, adding) => {
+  users.forEach(user => {
+    if(!user.inRoom) {
+      user.ws.send(JSON.stringify({
+        type: 'updateRooms',
+        room: room,
+        adding: adding
+      }))
+    }
+  })
+}
+
+// Removes player from room
 const leaveRoom = (roomIndex, id) => {
+  // If player was the czar, set another player to be the czar
   if(rooms[roomIndex]['players'].find(player => player.id === id).isCzar) {
     rotateCzar(roomIndex);
   }
   deleteObject(rooms[roomIndex]['players'], 'id', id);
+  users.find(user => user.id === id).inRoom = false;
+  // If player was the last in room, delete the room
   const humans = rooms[roomIndex].players.filter(player => !player.isBot);
   if(humans.length === 0) {
+    updateWaitingRooms(rooms[roomIndex], false);
     if(rooms[roomIndex].access === 'private') {
       delete passwords[rooms[roomIndex].id]
     }
     rooms.splice(roomIndex, 1);
+  // Otherwise, broadcast player disconnection
   } else {
     broadcast(roomIndex, {
       type: 'leave',
       players: rooms[roomIndex]['players'],
       id: id
     });
+    // If player was the last one who didn't play a card, move to next phase
     if(rooms[roomIndex]['players'].every(player => player.card !== '' || player.isCzar)) {
+      rooms[roomIndex]['phase'] = 'picking';
       broadcast(roomIndex, {
         type: 'updatePhase',
         phase: 'picking'
@@ -103,3 +123,4 @@ module.exports.leaveRoom = leaveRoom;
 module.exports.rotateCzar = rotateCzar;
 module.exports.generateCard = generateCard;
 module.exports.checkPlayingFinished = checkPlayingFinished;
+module.exports.updateWaitingRooms = updateWaitingRooms;

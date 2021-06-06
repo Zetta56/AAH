@@ -25,11 +25,13 @@ wss.on('connection', function connection(ws, req) {
         if(room.access === 'private') {
           passwords[room.id] = body.password;
         }
+        users.find(user => user.id === id).inRoom = true;
         ws.send(JSON.stringify({
           type: 'join',
           room: h.omit(room, 'players'),
           players: room['players']
         }));
+        h.updateWaitingRooms(room, true);
         break;
 
       case 'joinRoom':
@@ -39,6 +41,7 @@ wss.on('connection', function connection(ws, req) {
           return;
         }
         rooms[roomIndex]['players'].push(new Player(id, username, false));
+        users.find(user => user.id === id).inRoom = true;
         h.broadcast(roomIndex, {
           type: 'join',
           room: h.omit(rooms[roomIndex], 'players'),
@@ -63,6 +66,10 @@ wss.on('connection', function connection(ws, req) {
         break;
 
       case 'startRound': {
+        // Removes room from roomlist if this is the first round
+        if(rooms[roomIndex]['phase'] === 'waiting') {
+          h.updateWaitingRooms(rooms[roomIndex], false);
+        }
         // Reset game state to the start of a round
         h.rotateCzar(roomIndex);
         rooms[roomIndex]['phase'] = 'playing';
@@ -129,6 +136,7 @@ wss.on('connection', function connection(ws, req) {
         rooms[roomIndex]['players'].forEach(player => {
           player.score = 0;
         })
+        h.updateWaitingRooms(rooms[roomIndex], true);
         h.broadcast(roomIndex, {
           type: 'updatePhase',
           phase: `waiting`
@@ -137,7 +145,7 @@ wss.on('connection', function connection(ws, req) {
 
       case 'leaveRoom': {
         h.leaveRoom(roomIndex, id);
-        users[id].send(JSON.stringify({
+        users.find(user => user.id === id).ws.send(JSON.stringify({
           type: 'leave',
           id: id
         }))
@@ -154,7 +162,7 @@ wss.on('connection', function connection(ws, req) {
         break;
       }
     }
-    delete users[id]
+    users.splice(users.findIndex(user => user.id === id), 1)
   })
 })
 

@@ -1,7 +1,7 @@
 // Structure: [ room, room, room... ]
 const rooms = [];
 // Structure: { userId: websocket }
-const users = {};
+const users = [];
 // Structure: { roomId: password }
 const passwords = {};
 

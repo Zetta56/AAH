@@ -45,7 +45,7 @@
 </template>
 
 <script>
-import { mapState } from 'vuex'
+import { mapState, mapActions } from 'vuex'
 import api from '../api'
 import RoomItem from './RoomItem'
 import TextInput from './TextInput'
@@ -53,7 +53,6 @@ import TextInput from './TextInput'
 export default {
   data: function () {
     return {
-      rooms: [],
       newRoom: {
         name: '',
         access: 'public',
@@ -66,9 +65,10 @@ export default {
     TextInput
   },
   computed: {
-    ...mapState(['user', 'websocket'])
+    ...mapState(['user', 'websocket', 'rooms'])
   },
   methods: {
+    ...mapActions(['updateRooms']),
     onAccessClick: function () {
       if (this.newRoom.access === 'public') {
         this.newRoom.access = 'private'
@@ -94,7 +94,7 @@ export default {
   },
   async mounted () {
     const response = await api('/api/rooms')
-    this.rooms = response
+    this.updateRooms(response)
   }
 }
 </script>

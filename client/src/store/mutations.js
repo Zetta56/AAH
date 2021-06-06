@@ -8,6 +8,9 @@ export default {
   updateWebsocket (state, websocket) {
     state.websocket = websocket
   },
+  updateRooms (state, rooms) {
+    state.rooms = rooms
+  },
   updateRoom (state, room) {
     state.room = room
   },

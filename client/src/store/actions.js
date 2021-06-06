@@ -5,6 +5,9 @@ export default {
   updateLoginStatus (context, loginStatus) {
     context.commit('updateLoginStatus', loginStatus)
   },
+  updateRooms (context, rooms) {
+    context.commit('updateRooms', rooms)
+  },
   connectWebsocket (context, { token, callback, error }) {
     if (token) {
       let baseUrl = process.env.VUE_APP_BACKEND_URL || window.location.origin
@@ -32,6 +35,14 @@ export default {
               context.commit('updateRoom', data.room)
             }
             context.commit('updatePlayers', data.players)
+            break
+          }
+          case 'updateRooms': {
+            if (data.adding) {
+              context.commit('updateRooms', [...context.state.rooms, data.room])
+            } else {
+              context.commit('updateRooms', context.state.rooms.filter(room => room.id !== data.room.id))
+            }
             break
           }
           case 'updatePlayers':
