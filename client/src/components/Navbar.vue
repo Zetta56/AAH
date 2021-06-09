@@ -31,7 +31,6 @@ export default {
       this.websocket.close()
       this.updateUser(null)
       this.updateLoginStatus(false)
-      this.connectWebsocket({ token: null })
     }
   }
 }

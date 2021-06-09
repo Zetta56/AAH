@@ -45,15 +45,14 @@ server.on('upgrade', (req, socket, head) => {
     const token = querystring.parse(req.url.substring(2)).token;
     const { id } = jwt.verify(token, process.env.JWT_SECRET);
 
-    if(!users.some(user => user.id === id)) {
-      wss.handleUpgrade(req, socket, head, (ws) => {
-        users.push({ id: id, ws: ws, inRoom: false });
-        wss.emit('connection', ws, req);
-      });
+    // if(!users.some(user => user.id === id)) {
+    wss.handleUpgrade(req, socket, head, (ws) => {
+      wss.emit('connection', ws, req);
+    });
     // Prevent user from connecting multiple times
-    } else {
-      socket.destroy();
-    }
+    // } else {
+    //   socket.destroy();
+    // }
   // Prevent user from connecting with invalid token
   } catch(err) {
     socket.destroy();

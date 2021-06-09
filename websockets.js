@@ -3,15 +3,16 @@ const WebSocket = require('ws'),
       querystring = require('querystring'),
       { v4: uuid } = require('uuid'),
       wss = new WebSocket.Server({ noServer: true }),
-      { Room, Player, Bot } = require('./schemas'),
       h = require('./helpers'),
+      { Room, Player, Bot } = require('./schemas'),
       { rooms, users, passwords } = require('./store');
 
 wss.on('connection', function connection(ws, req) {
   // Connection Initialization
   const token = querystring.parse(req.url.substring(2)).token;
   const { username, id } = jwt.verify(token, process.env.JWT_SECRET);
-
+  h.updateUsers(id, ws);
+  
   ws.on('message', (payload) => {
     // Parsing request
     const { type, roomId, body } = JSON.parse(payload);
@@ -25,7 +26,7 @@ wss.on('connection', function connection(ws, req) {
         if(room.access === 'private') {
           passwords[room.id] = body.password;
         }
-        users.find(user => user.id === id).inRoom = true;
+        users.find(user => user.id === id).roomId = room.id;
         ws.send(JSON.stringify({
           type: 'join',
           room: h.omit(room, 'players'),
@@ -41,7 +42,7 @@ wss.on('connection', function connection(ws, req) {
           return;
         }
         rooms[roomIndex]['players'].push(new Player(id, username, false));
-        users.find(user => user.id === id).inRoom = true;
+        users.find(user => user.id === id).roomId = rooms[roomIndex].id;
         h.broadcast(roomIndex, {
           type: 'join',
           room: h.omit(rooms[roomIndex], 'players'),
@@ -155,14 +156,16 @@ wss.on('connection', function connection(ws, req) {
   })
 
   ws.on('close', () => {
-    // Pull user from room
-    for(let i = 0; i < rooms.length; i++) {
-      if(rooms[i]['players'].some(player => player.id === id)) {
-        h.leaveRoom(i, id);
-        break;
-      }
+    const user = users.find(user => user.id === id);
+    // Remove user from store if they don't reconnect on another websocket
+    if(user && user.ws.readyState === WebSocket.CLOSED) {
+      user.disconnect = setTimeout(() => {
+        console.log('Disconnected')
+        roomIndex = rooms.findIndex(room => room.id === user.roomId);
+        h.leaveRoom(roomIndex, id);
+        h.deleteObject(users, 'id', id);
+      }, 3000);
     }
-    users.splice(users.findIndex(user => user.id === id), 1)
   })
 })
 

@@ -8,6 +8,9 @@ export default {
   updateRooms (context, rooms) {
     context.commit('updateRooms', rooms)
   },
+  updateLoading (context, loading) {
+    context.commit('updateLoading', loading)
+  },
   connectWebsocket (context, { token, callback, error }) {
     if (token) {
       let baseUrl = process.env.VUE_APP_BACKEND_URL || window.location.origin
@@ -30,6 +33,15 @@ export default {
       ws.onmessage = (event) => {
         const data = JSON.parse(event.data)
         switch (data.type) {
+          case 'connect': {
+            if (data.reconnecting) {
+              const { players, ...room } = data.room
+              context.commit('updateRoom', room)
+              context.commit('updatePlayers', players)
+            }
+            context.commit('updateLoading', false)
+            break
+          }
           case 'join': {
             if (!context.state.room) {
               context.commit('updateRoom', data.room)
@@ -63,6 +75,12 @@ export default {
               context.commit('updatePlayers', data.players)
             }
             break
+        }
+      }
+
+      ws.onclose = () => {
+        if (context.state.user) {
+          context.commit('updateError', 'disconnect')
         }
       }
     }

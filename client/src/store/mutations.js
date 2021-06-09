@@ -8,6 +8,12 @@ export default {
   updateWebsocket (state, websocket) {
     state.websocket = websocket
   },
+  updateLoading (state, loading) {
+    state.loading = loading
+  },
+  updateError (state, error) {
+    state.error = error
+  },
   updateRooms (state, rooms) {
     state.rooms = rooms
   },
