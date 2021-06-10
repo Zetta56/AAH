@@ -65,7 +65,7 @@ export default {
       this.websocket.send(JSON.stringify({
         type: 'submitCard',
         roomId: this.room.id,
-        body: this.selected.text
+        card: this.selected.text
       }))
       this.selected = null
     }

@@ -59,7 +59,7 @@ export default {
         this.websocket.send(JSON.stringify({
           type: 'pickCard',
           roomId: this.room.id,
-          body: id
+          winnerId: id
         }))
       }
     },

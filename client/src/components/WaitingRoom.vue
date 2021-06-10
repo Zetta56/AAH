@@ -33,14 +33,14 @@ export default {
       this.websocket.send(JSON.stringify({
         type: 'addBot',
         roomId: this.room.id,
-        body: 'Bot'
+        name: 'Bot'
       }))
     },
     deleteBot: function (id) {
       this.websocket.send(JSON.stringify({
         type: 'deleteBot',
         roomId: this.room.id,
-        body: id
+        botId: id
       }))
     },
     startGame: function () {

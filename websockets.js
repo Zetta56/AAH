@@ -15,8 +15,9 @@ wss.on('connection', function connection(ws, req) {
   
   ws.on('message', (payload) => {
     // Parsing request
-    const { type, roomId, body } = JSON.parse(payload);
+    const { type, roomId, ...body } = JSON.parse(payload);
     const roomIndex = rooms.findIndex(room => room.id === roomId);
+    const currentRoom = rooms.find(room => room.id === users.find(user => user.id === id).roomId);
     
     switch(type) {
       case 'createRoom':
@@ -51,18 +52,18 @@ wss.on('connection', function connection(ws, req) {
         break;
 
       case 'addBot':
-        rooms[roomIndex]['players'].push(new Bot(uuid(), body));
+        currentRoom['players'].push(new Bot(uuid(), body.name));
         h.broadcast(roomIndex, {
           type: 'updatePlayers',
-          players: rooms[roomIndex]['players']
+          players: currentRoom['players']
         });
         break;
 
       case 'deleteBot':
-        h.deleteObject(rooms[roomIndex]['players'], 'id', body);
+        h.deleteObject(currentRoom['players'], 'id', body.botId);
         h.broadcast(roomIndex, {
           type: 'updatePlayers',
-          players: rooms[roomIndex]['players']
+          players: currentRoom['players']
         });
         break;
 
@@ -106,8 +107,8 @@ wss.on('connection', function connection(ws, req) {
       case 'submitCard':
         // Move card from hand to played cards
         const foundPlayer = rooms[roomIndex]['players'].find(player => player.id === id);
-        foundPlayer.card = body;
-        foundPlayer.hand.splice(foundPlayer.hand.indexOf(body), 1);
+        foundPlayer.card = body.card;
+        foundPlayer.hand.splice(foundPlayer.hand.indexOf(body.card), 1);
         h.broadcast(roomIndex, {
           type: 'updatePlayers',
           players: rooms[roomIndex]['players']
@@ -117,7 +118,7 @@ wss.on('connection', function connection(ws, req) {
 
       case 'pickCard':
         // Make picked card's owner the winner of the round
-        const winner = rooms[roomIndex]['players'].find(player => player.id === body);
+        const winner = rooms[roomIndex]['players'].find(player => player.id === body.winnerId);
         winner.isWinner = true;
         winner.score += 1;
         
