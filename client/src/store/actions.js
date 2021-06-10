@@ -43,10 +43,11 @@ export default {
             break
           }
           case 'join': {
+            const { players, ...room } = data.room
             if (!context.state.room) {
-              context.commit('updateRoom', data.room)
+              context.commit('updateRoom', room)
             }
-            context.commit('updatePlayers', data.players)
+            context.commit('updatePlayers', players)
             break
           }
           case 'updateRooms': {
@@ -63,11 +64,13 @@ export default {
           case 'updatePhase':
             context.commit('updatePhase', data.phase)
             break
-          case 'startRound':
-            context.commit('updateRoom', data.room)
-            context.commit('updatePlayers', data.players)
+          case 'startRound': {
+            const { players, ...room } = data.room
+            context.commit('updateRoom', room)
+            context.commit('updatePlayers', players)
             break
-          case 'leave':
+          }
+          case 'leaveRoom':
             if (data.id === context.state.user.id) {
               context.commit('updateRoom', null)
               context.commit('updatePlayers', [])

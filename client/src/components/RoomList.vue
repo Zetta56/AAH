@@ -88,7 +88,9 @@ export default {
     onRoomCreate: function () {
       this.websocket.send(JSON.stringify({
         type: 'createRoom',
-        body: this.newRoom
+        name: this.newRoom.name,
+        access: this.newRoom.access,
+        password: this.newRoom.password
       }))
     }
   },
