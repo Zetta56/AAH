@@ -9,7 +9,7 @@
       <span class="population">{{ population }}/4</span>
     </div>
     <b-collapse v-if="room.access === 'private'" :id="`collapse-${index}`" class="bottom">
-      <TextInput :text.sync="password" :placeholder="'Password'">
+      <TextInput :onSubmit="joinPrivate" :text.sync="password" :placeholder="'Password'">
         <template #prepend>
           <b-icon-arrow-return-right />
         </template>
@@ -50,6 +50,13 @@ export default {
           roomId: this.room.id
         }))
       }
+    },
+    joinPrivate: function () {
+      this.websocket.send(JSON.stringify({
+        type: 'joinRoom',
+        roomId: this.room.id,
+        password: this.password
+      }))
     }
   }
 }

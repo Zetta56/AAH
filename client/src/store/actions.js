@@ -50,6 +50,9 @@ export default {
             context.commit('updatePlayers', players)
             break
           }
+          case 'failed':
+            console.log('failed')
+            break
           case 'updateRooms': {
             if (data.adding) {
               context.commit('updateRooms', [...context.state.rooms, data.room])

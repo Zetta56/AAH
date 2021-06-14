@@ -3,9 +3,7 @@ const WebSocket = require('ws'),
       querystring = require('querystring'),
       { v4: uuid } = require('uuid'),
       wss = new WebSocket.Server({ noServer: true }),
-      Markov = require('./markov'),
-      Store = require('./store'),
-      { Room, Player, Bot } = require('./models');
+      { Store, Room, Player, Bot } = require('./models');
 
 wss.on('connection', function connection(ws, req) {
   // Connection Initialization
@@ -25,7 +23,7 @@ wss.on('connection', function connection(ws, req) {
         Store.getUser(id).roomId = room.id;
         Store.rooms.push(room);
         if(room.access === 'private') {
-          passwords[room.id] = body.password;
+          Store.passwords[room.id] = body.password;
         }
         ws.send(JSON.stringify({ type: 'join', room: room }));
         Store.updateWaitingRooms(room, true);
@@ -35,11 +33,13 @@ wss.on('connection', function connection(ws, req) {
       case 'joinRoom': {
         const room = Store.getRoom(body.roomId);
         // Stop if room doesn't exist or user entered wrong password
-        if(room && (room.access === 'public' || body.password === passwords[room.id])) {
+        if(room && (room.access === 'public' || body.password === Store.passwords[room.id])) {
           room.players.push(new Player(id, username, false));
           Store.getUser(id).roomId = room.id;
           room.broadcast('join', { room: room });
-        }
+        } else {
+          ws.send(JSON.stringify({ type: 'failed', room: body.roomId }))
+        };
         break;
       }
 
