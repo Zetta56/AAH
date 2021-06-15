@@ -5,6 +5,8 @@
 Algorithms Against Humanity (a.k.a. AAH) is my custom Cards Against Humanity spinoff that uses the power of Websockets and Markov Chains.
 This version also implements rooms and bots for both singleplayer and multiplayer needs.
 
+**A live demo can be found here: https://a-a-h.glitch.me/**
+
 ## Requirements
 1. [npm](https://www.npmjs.com/get-npm)
 2. [Node.js](https://nodejs.org/en/download/)
