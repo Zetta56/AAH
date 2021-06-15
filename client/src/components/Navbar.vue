@@ -4,7 +4,7 @@
       <strong>AAH</strong>
     </span>
     <div class="right">
-      <span class="logout" @click="logout">Logout</span>
+      <span class="logout" @click="onLogoutClick">Logout</span>
     </div>
   </div>
 </template>
@@ -17,7 +17,7 @@ export default {
     ...mapState(['websocket', 'room'])
   },
   methods: {
-    ...mapActions(['updateUser', 'updateLoginStatus', 'connectWebsocket']),
+    ...mapActions(['logout', 'connectWebsocket']),
     onBrandClick: function () {
       if (this.room) {
         this.websocket.send(JSON.stringify({
@@ -26,11 +26,10 @@ export default {
         }))
       }
     },
-    logout: function () {
+    onLogoutClick: function () {
       localStorage.removeItem('token')
       this.websocket.close()
-      this.updateUser(null)
-      this.updateLoginStatus(false)
+      this.logout()
     }
   }
 }

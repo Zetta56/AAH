@@ -11,13 +11,17 @@ export default {
   updateLoading (context, loading) {
     context.commit('updateLoading', loading)
   },
+  logout (context) {
+    context.commit('updateRoom', null)
+    context.commit('updatePlayers', null)
+    context.commit('updateUser', null)
+    context.commit('updateWebsocket', null)
+    context.commit('updateLoginStatus', false)
+  },
   connectWebsocket (context, { token, callback, error }) {
     if (token) {
-      let baseUrl = process.env.VUE_APP_BACKEND_URL || window.location.origin
-      if (baseUrl.substring(0, 4) === 'http') {
-        baseUrl = baseUrl.replace('http', 'ws')
-      }
-      const ws = new WebSocket(baseUrl + `?token=${token}`)
+      const baseUrl = process.env.VUE_APP_BACKEND_URL || window.location.origin
+      const ws = new WebSocket(baseUrl.replace(/^http/, 'ws') + `?token=${token}`)
       ws.onerror = () => {
         context.commit('updateWebsocket', null)
         if (error) {
