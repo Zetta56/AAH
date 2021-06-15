@@ -41,7 +41,7 @@ class Room {
   resetState() {
     this.rotateCzar();
     this.phase = 'playing';
-    this.prompt = markov.generate(4, 10, true);
+    this.prompt = markov.generate(2, 5, true);
     this.players.forEach(player => {
       player.card = '';
       player.isWinner = false;
@@ -50,7 +50,7 @@ class Room {
       }
       if(!player.isBot) {
         while(player.hand.length < 5) {
-          player.hand.push(markov.generate(3, 5, false));
+          player.hand.push(markov.generate(1, 3, false));
         }
       }
     });
