@@ -50,7 +50,7 @@ class Room {
       }
       if(!player.isBot) {
         while(player.hand.length < 5) {
-          player.hand.push(markov.generate(2, 4, false));
+          player.hand.push(markov.generate(3, 5, false));
         }
       }
     });

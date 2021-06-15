@@ -1,4 +1,7 @@
 # Algorithms Against Humanity
+
+![Game](/docs/images/game.PNG)
+
 Algorithms Against Humanity (a.k.a. AAH) is my custom Cards Against Humanity spinoff that uses the power of Websockets and Markov Chains.
 This version also implements rooms and bots for both singleplayer and multiplayer needs.
 

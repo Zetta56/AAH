@@ -7,7 +7,7 @@ class Bot extends Player {
   }
 
   submitCard(room) {
-    this.card = markov.generate(2, 4);
+    this.card = markov.generate(3, 5);
     room.broadcast('updatePlayers', { players: room.players });
   }
 
