@@ -1,5 +1,5 @@
 const Player = require('./Player');
-const Markov = require('./Markov');
+const markov = require('./Markov');
 
 class Bot extends Player {
   constructor(id, username) {
@@ -7,7 +7,7 @@ class Bot extends Player {
   }
 
   submitCard(room) {
-    this.card = Markov.generate(2, 4);
+    this.card = markov.generate(2, 4);
     room.broadcast('updatePlayers', { players: room.players });
   }
 

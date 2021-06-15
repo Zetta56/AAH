@@ -1,9 +1,8 @@
 const fs = require('fs');
 
 class Markov {
-  static options = {};
-
-  static init() {
+  constructor() {
+    this.choices = {};
     // Converts file to bytes to string to array of words
     const words = fs.readFileSync('./sentences.txt').toString().toLowerCase().split(/\r\n| /);
     for(let i = 0; i < words.length - 1; i++) {
@@ -12,26 +11,26 @@ class Markov {
       if(i == 0 || i == words.length - 2) {
         words[i + 1] = words[i + 1].replace(/\./g, "");
       }
-      // Add word to array if it exists in options
-      if(words[i] in Markov.options) {
-        Markov.options[words[i]].push(words[i + 1]);
+      // Add word to array if it exists in choices
+      if(words[i] in this.choices) {
+        this.choices[words[i]].push(words[i + 1]);
       // Create the word array otherwise
       } else {
-        Markov.options[words[i]] = [words[i + 1]];
+        this.choices[words[i]] = [words[i + 1]];
       }
     }
   }
 
-  static generate(min, max, hideWord) {
+  generate(min, max, hideWord) {
     const maxLength = Math.floor((Math.random() * (max - min)) + min);
     let chain;
     do {
-      chain = [Markov.choose(Object.keys(Markov.options))];
+      chain = [this.getRandom(Object.keys(this.choices))];
       while(chain.length < maxLength) {
         // Choose a random next word
-        const possibleWords = Markov.options[chain[chain.length - 1]];
+        const possibleWords = this.choices[chain[chain.length - 1]];
         if(possibleWords) {
-          chain.push(Markov.choose(possibleWords));
+          chain.push(this.getRandom(possibleWords));
         } else {
           break;
         }
@@ -46,9 +45,10 @@ class Markov {
     return chain.join(" ");
   }
 
-  static choose(array) {
+  getRandom(array) {
     return array[Math.floor(Math.random() * array.length)];
   }
 }
 
-module.exports = Markov;
+const markov = new Markov();
+module.exports = markov;

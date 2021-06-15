@@ -1,6 +1,6 @@
 const { v4: uuid } = require('uuid');
 const Store = require('./Store');
-const Markov = require('./Markov');
+const markov = require('./Markov');
 
 class Room {
   constructor(name, access, initialPlayer) {
@@ -41,7 +41,7 @@ class Room {
   resetState() {
     this.rotateCzar();
     this.phase = 'playing';
-    this.prompt = Markov.generate(4, 10, true);
+    this.prompt = markov.generate(4, 10, true);
     this.players.forEach(player => {
       player.card = '';
       player.isWinner = false;
@@ -50,7 +50,7 @@ class Room {
       }
       if(!player.isBot) {
         while(player.hand.length < 5) {
-          player.hand.push(Markov.generate(2, 4, false));
+          player.hand.push(markov.generate(2, 4, false));
         }
       }
     });

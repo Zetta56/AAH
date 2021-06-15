@@ -18,7 +18,6 @@
       <b-button variant="dark" class="scoreboard-button" v-b-modal.scoreboard>
         Scoreboard
       </b-button>
-      <span class="timer">30</span>
     </div>
     <SharedCards />
     <Hand v-if="!userPlayer.isCzar" />
@@ -94,19 +93,11 @@ export default {
   margin: 10px 0;
 }
 
-.scoreboard-button,
-.timer {
+.scoreboard-button {
   display: flex;
   align-items: center;
   padding: 0.5rem 0.75rem;
   font-size: 20px;
-}
-
-.timer {
-  margin-left: auto;
-  background-color: #343a40;
-  color: #ffffff;
-  border-radius: 0.25rem;
 }
 
 >>> #scoreboard {

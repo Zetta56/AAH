@@ -8,12 +8,11 @@ const http = require('http'),
       querystring = require('querystring'),
       { v4: uuid } = require('uuid'),
       wss = require('./websockets'),
-      { Store, Markov } = require("./models");
+      { Store } = require("./models");
 
 /** Settings */
 const app = express();
 const server = http.createServer(app);
-Markov.init();
 
 app.use(cors());
 app.use(express.json({limit: '30mb'}));
