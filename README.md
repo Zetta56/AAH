@@ -22,4 +22,5 @@ JWT_SECRET="[your string key goes here]"
 4. Run `node server.js` in the root directory to start the app
 
 ## Development
-Instead of building the client, you can run `npm run serve` to start the Vue development server.
+- Instead of building the client, you can run `npm run serve` to start the Vue development server.
+- You can edit `sentences.txt` to change the dataset used by the markov chain.
