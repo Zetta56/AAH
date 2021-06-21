@@ -86,11 +86,11 @@ class Room {
   }
 
   leave(userId) {
+    const message = this.getPlayer(userId).username + " has disconnected"
     // If player was the czar, set another player to be the czar
     if(this.getCzar() && this.getCzar().id === userId) {
       this.rotateCzar();
     }
-    
     this.removePlayer(userId);
     Store.getUser(userId).roomId = null;
 
@@ -98,7 +98,11 @@ class Room {
     if(this.players.filter(player => !player.isBot).length === 0) {
       Store.removeRoom(this);
     } else {
-      this.broadcast('leaveRoom', { players: this.players, id: userId });
+      this.broadcast('leaveRoom', {
+        players: this.players,
+        id: userId,
+        message: message
+      });
       this.checkPlayingFinished();
     }
   }

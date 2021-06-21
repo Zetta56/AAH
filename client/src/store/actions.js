@@ -17,6 +17,7 @@ export default {
     context.commit('updateUser', null)
     context.commit('updateWebsocket', null)
     context.commit('updateLoginStatus', false)
+    context.commit('updateChat', [])
   },
   connectWebsocket (context, { token, callback, error }) {
     if (token) {
@@ -77,12 +78,22 @@ export default {
             context.commit('updatePlayers', players)
             break
           }
+          case 'sendChat': {
+            const message = {
+              text: data.text,
+              username: data.username
+            }
+            context.commit('addChat', message)
+            break
+          }
           case 'leaveRoom':
             if (data.id === context.state.user.id) {
               context.commit('updateRoom', null)
               context.commit('updatePlayers', [])
+              context.commit('updateChat', [])
             } else {
               context.commit('updatePlayers', data.players)
+              context.commit('addChat', { text: data.message })
             }
             break
         }

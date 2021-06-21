@@ -86,6 +86,13 @@ wss.on('connection', function connection(ws, req) {
         currentRoom.getCzar().pickWinner(currentRoom, winner);
         break;
 
+      case 'sendChat':
+        currentRoom.broadcast('sendChat', {
+          text: body.text,
+          username: body.username
+        })
+        break;
+
       case 'endGame':
         currentRoom.endGame()
         break;
