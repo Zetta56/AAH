@@ -1,6 +1,9 @@
 <template>
   <span>
-    <b-button variant="dark" class="toggle" v-b-modal.chat>
+    <b-button variant="dark" class="toggle" @click="toggleModal">
+      <span class="circle-container" v-if="notification">
+        <b-icon-circle-fill />
+      </span>
       <b-icon-chat-left-text-fill />
     </b-button>
     <b-modal id="chat" ref="chat" title="Chat" :hide-footer="true" centered>
@@ -34,7 +37,8 @@ export default {
   },
   data: function () {
     return {
-      message: ''
+      message: '',
+      notification: false
     }
   },
   computed: {
@@ -48,6 +52,17 @@ export default {
         username: this.user.username
       }))
       this.message = ''
+    },
+    toggleModal: function () {
+      this.$refs.chat.show()
+      this.notification = false
+    }
+  },
+  watch: {
+    '$store.state.chat': function () {
+      if (!this.$refs.chat.isShow) {
+        this.notification = true
+      }
     }
   }
 }
@@ -67,6 +82,19 @@ export default {
 }
 .message {
   margin: 0.75rem 0;
+}
+.circle-container {
+  position: relative;
+  width: 0;
+  height: 0;
+}
+>>> .bi-circle-fill {
+  color: red;
+  position: absolute;
+  left: 1rem;
+  top: -1.5rem;
+  width: 0.75rem;
+  z-index: 1;
 }
 .username {
   font-weight: 700;

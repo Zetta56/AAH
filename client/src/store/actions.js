@@ -11,6 +11,10 @@ export default {
   updateLoading (context, loading) {
     context.commit('updateLoading', loading)
   },
+  updateError (context, error) {
+    console.log(error)
+    context.commit('updateError', error)
+  },
   logout (context) {
     context.commit('updateRoom', null)
     context.commit('updatePlayers', null)
@@ -55,8 +59,8 @@ export default {
             context.commit('updatePlayers', players)
             break
           }
-          case 'failed':
-            console.log('failed')
+          case 'deniedRoom':
+            context.commit('updateError', 'deniedRoom')
             break
           case 'updateRooms': {
             if (data.adding) {
@@ -66,18 +70,18 @@ export default {
             }
             break
           }
+          case 'updateRoom': {
+            const { players, ...room } = data.room
+            context.commit('updateRoom', room)
+            context.commit('updatePlayers', players)
+            break
+          }
           case 'updatePlayers':
             context.commit('updatePlayers', data.players)
             break
           case 'updatePhase':
             context.commit('updatePhase', data.phase)
             break
-          case 'startRound': {
-            const { players, ...room } = data.room
-            context.commit('updateRoom', room)
-            context.commit('updatePlayers', players)
-            break
-          }
           case 'sendChat': {
             const message = {
               text: data.text,
