@@ -12,7 +12,7 @@ This version also implements rooms and bots for both singleplayer and multiplaye
 2. [Node.js](https://nodejs.org/en/download/)
 
 ## Usage
-1. Run `git clone https://github.com/Zetta56/AAH.git` in your desired folder destination.
+1. Run `git clone https://github.com/Zetta56/Algorithms-Against-Humanity.git` in your desired folder destination.
 2. Add a `.env` file in the root with the following:
 ```
 JWT_SECRET="[your string key goes here]"
