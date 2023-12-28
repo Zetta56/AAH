@@ -1,0 +1,34 @@
+on: 
+  push:
+    branches: [ "main" ]
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '16.x'
+    - name: Build client
+      working-directory: ./client
+      run: |
+        npm ci
+        npm run build
+    - name: Push to glitch branch
+      run: |
+        git config user.name github-actions
+        git config user.email github-actions@github.com
+        git add client/dist/* -f
+        git commit -m "build client"
+        git push origin main:glitch -f
+    - name: Sync with glitch repository 
+      uses: wei/git-sync@v1
+      env:
+        SOURCE_REPO: "https://github.com/Zetta56/Algorithms-Against-Humanity.git"
+        SOURCE_BRANCH: "glitch"
+        DESTINATION_REPO: ${{ secrets.glitch_git_url }}
+        DESTINATION_BRANCH: "master"
+      with:
+        args: $SOURCE_REPO $SOURCE_BRANCH $DESTINATION_REPO $DESTINATION_BRANCH
